@@ -1,5 +1,6 @@
 MoceanAPI Client Library for Java 
 ============================
+[![Maven Release](https://maven-badges.herokuapp.com/maven-central/com.github.moceanapi/moceanapisdk/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.moceanapi/moceanapisdk)
 
 This is the Java client library for use Mocean's API. To use this, you'll need a Mocean account. Sign up [for free at 
 moceanapi.com][signup].
