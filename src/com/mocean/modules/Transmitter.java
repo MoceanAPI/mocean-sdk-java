@@ -1,4 +1,4 @@
-package com.mocean.modules;
+package mocean.modules;
 import java.util.HashMap;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -13,7 +13,7 @@ import java.io.UnsupportedEncodingException;
 
 public class Transmitter {
 	
-	private final String DOMAIN = "https://rest-api.moceansms.com";
+	private final String DOMAIN = "https://rest.moceanapi.com";
 	private final String USER_AGENT = "Mozilla/5.0";
 	private HashMap<String,String> params;
 	private String uri,response;
@@ -22,6 +22,7 @@ public class Transmitter {
 	{
 		this.uri = uri;
 		this.params = params;
+		this.params.put("mocean-medium", "JAVA-SDK");
 		switch(method.toLowerCase())
 		{
 		
