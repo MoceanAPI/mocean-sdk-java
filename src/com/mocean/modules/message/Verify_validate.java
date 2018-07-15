@@ -5,7 +5,7 @@ import com.mocean.modules.Transmitter;
 import java.util.HashMap;
 
 
-public class Verify_validate extends com.MoceanFactory {
+public class Verify_validate extends com.mocean.modules.MoceanFactory {
 	
 	public Verify_validate(Client client) 
 	{
