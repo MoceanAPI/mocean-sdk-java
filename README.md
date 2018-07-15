@@ -20,7 +20,7 @@ Add the following to the correct place in your project's POM file:
 <dependency>
       <groupId>com.github.moceanapi</groupId>
       <artifactId>moceanapisdk</artifactId>
-      <version>0.0.1</version>
+      <version>0.0.15</version>
 </dependency>
 ```
 
