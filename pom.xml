@@ -45,7 +45,7 @@
   </distributionManagement>
   
   <build>
-    <sourceDirectory>${basedir}/src/com</sourceDirectory>
+    <sourceDirectory>${basedir}/src</sourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
