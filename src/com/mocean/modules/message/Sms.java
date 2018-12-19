@@ -1,16 +1,17 @@
 package com.mocean.modules.message;
 
-import com.mocean.system.Client;
+import com.mocean.modules.MoceanFactory;
 import com.mocean.modules.Transmitter;
+import com.mocean.system.auth.AuthInterface;
 
 import java.util.HashMap;
 
-public class Sms extends com.mocean.modules.MoceanFactory {
+public class Sms extends MoceanFactory {
 
     public Boolean flashSms = false;
 
-    public Sms(Client client) {
-        super(client);
+    public Sms(AuthInterface objAuth) {
+        super(objAuth);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-from", "mocean-to", "mocean-text"};
     }
 
@@ -94,7 +95,7 @@ public class Sms extends com.mocean.modules.MoceanFactory {
     }
 
     public String send() throws Exception {
-        if (this.flashSms == true) {
+        if (this.flashSms) {
             this.params.put("mocean-mclass", "1");
             this.params.put("mocean-alt-dcs", "1");
         }

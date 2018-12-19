@@ -1,14 +1,15 @@
 package com.mocean.modules.account;
 
+import com.mocean.modules.MoceanFactory;
 import com.mocean.modules.Transmitter;
-import com.mocean.system.Client;
+import com.mocean.system.auth.AuthInterface;
 
 import java.util.HashMap;
 
-public class Balance extends com.mocean.modules.MoceanFactory {
+public class Balance extends MoceanFactory {
 
-    public Balance(Client client) {
-        super(client);
+    public Balance(AuthInterface objAuth) {
+        super(objAuth);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret"};
     }
 
@@ -16,7 +17,6 @@ public class Balance extends com.mocean.modules.MoceanFactory {
         this.params.put("mocean-resp-format", param);
         return this;
     }
-
 
     public String inquiry() throws Exception {
         return this.send();
@@ -34,6 +34,5 @@ public class Balance extends com.mocean.modules.MoceanFactory {
         Transmitter httpRequest = new Transmitter("/rest/1/account/balance", "get", this.params);
         return httpRequest.getResponse();
     }
-
 
 }

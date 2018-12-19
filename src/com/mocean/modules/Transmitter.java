@@ -1,16 +1,11 @@
 package com.mocean.modules;
 
+import com.mocean.exception.MoceanErrorException;
+
+import java.io.*;
+import java.net.*;
 import java.util.HashMap;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLEncoder;
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 public class Transmitter {
 
@@ -18,6 +13,7 @@ public class Transmitter {
     private final String USER_AGENT = "Mozilla/5.0";
     private HashMap<String, String> params;
     private String uri, response;
+    private int responseCode;
 
     public Transmitter(String uri, String method, HashMap<String, String> params) throws Exception {
         this.uri = uri;
@@ -39,7 +35,7 @@ public class Transmitter {
         }
     }
 
-    private void __post() throws Exception {
+    private void __post() throws IOException {
         URL obj = new URL(DOMAIN + this.uri);
         HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
@@ -54,9 +50,17 @@ public class Transmitter {
         wr.flush();
         wr.close();
 
-        int responseCode = con.getResponseCode();
+        this.responseCode = con.getResponseCode();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        InputStream resultStream;
+
+        if (this.responseCode < HttpURLConnection.HTTP_BAD_REQUEST) {
+            resultStream = con.getInputStream();
+        } else {
+            resultStream = con.getErrorStream();
+        }
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(resultStream));
         String inputLine;
         StringBuffer response = new StringBuffer();
 
@@ -68,7 +72,7 @@ public class Transmitter {
         this.response = response.toString();
     }
 
-    private void __get() throws Exception {
+    private void __get() throws IOException {
         URL obj = new URL(DOMAIN + this.uri + "?" + this.urlEncodeUTF8(this.params));
         HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
@@ -78,10 +82,17 @@ public class Transmitter {
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
 
-        int responseCode = con.getResponseCode();
+        this.responseCode = con.getResponseCode();
 
+        InputStream resultStream;
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        if (this.responseCode < HttpURLConnection.HTTP_BAD_REQUEST) {
+            resultStream = con.getInputStream();
+        } else {
+            resultStream = con.getErrorStream();
+        }
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(resultStream));
         String inputLine;
         StringBuffer response = new StringBuffer();
 
@@ -101,7 +112,10 @@ public class Transmitter {
 
     }
 
-    public String getResponse() {
+    public String getResponse() throws MoceanErrorException {
+        if (this.responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+            throw new MoceanErrorException(this.response);
+        }
         return this.response;
     }
 

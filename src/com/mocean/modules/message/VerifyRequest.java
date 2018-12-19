@@ -1,14 +1,15 @@
 package com.mocean.modules.message;
 
-import com.mocean.system.Client;
+import com.mocean.modules.MoceanFactory;
 import com.mocean.modules.Transmitter;
+import com.mocean.system.auth.AuthInterface;
 
 import java.util.HashMap;
 
-public class VerifyRequest extends com.mocean.modules.MoceanFactory {
+public class VerifyRequest extends MoceanFactory {
 
-    public VerifyRequest(Client client) {
-        super(client);
+    public VerifyRequest(AuthInterface objAuth) {
+        super(objAuth);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-to", "mocean-brand"};
     }
 

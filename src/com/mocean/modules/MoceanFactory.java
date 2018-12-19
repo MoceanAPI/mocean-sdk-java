@@ -1,34 +1,31 @@
 package com.mocean.modules;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import com.mocean.system.Client;
+import com.mocean.exception.RequiredFieldException;
+import com.mocean.system.auth.AuthInterface;
 
 public class MoceanFactory {
 
     protected HashMap<String, String> params;
     protected String[] requiredFields;
-    private Client client;
 
-    public MoceanFactory(Client client) {
-        this.params = new HashMap<String, String>();
-        this.params.put("mocean-api-key", client.getApiKey());
-        this.params.put("mocean-api-secret", client.getApiSecret());
-        this.client = client;
+    private AuthInterface objAuth;
+
+    public MoceanFactory(AuthInterface objAuth) {
+        this.objAuth = objAuth;
+        this.params = objAuth.getParams();
         this.requiredFields = new String[0];
     }
 
-    protected Boolean isRequiredFieldsSet() {
+    protected void isRequiredFieldsSet() throws RequiredFieldException {
         for (String value : this.requiredFields) {
             if (this.params.get(value) == null) {
-                throw new java.lang.Error(value + " is mandatory field, can't be empty.");
+                throw new RequiredFieldException(value + " is mandatory field, can't be empty.");
             }
         }
-        return true;
     }
 
     protected void createFinalParams() {
@@ -58,8 +55,6 @@ public class MoceanFactory {
     }
 
     protected void reset() {
-        this.params = new HashMap<String, String>();
-        this.params.put("mocean-api-key", this.client.getApiKey());
-        this.params.put("mocean-api-secret", this.client.getApiSecret());
+        this.params = this.objAuth.getParams();
     }
 }

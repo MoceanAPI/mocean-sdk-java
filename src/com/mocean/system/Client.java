@@ -1,9 +1,11 @@
 package com.mocean.system;
 
+import com.mocean.system.auth.AuthInterface;
+
 import java.util.Map;
 import java.util.HashMap;
 
-public class Client {
+public class Client implements AuthInterface {
 
     private HashMap<String, String> params;
 
@@ -31,5 +33,15 @@ public class Client {
 
     public String getApiSecret() {
         return this.params.get("mocean-api-secret");
+    }
+
+    @Override
+    public String getAuthMethod() {
+        return "basic";
+    }
+
+    @Override
+    public HashMap<String, String> getParams() {
+        return this.params;
     }
 }

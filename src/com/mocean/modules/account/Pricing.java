@@ -1,15 +1,15 @@
 package com.mocean.modules.account;
 
-import com.mocean.system.Client;
-
 import java.util.HashMap;
 
+import com.mocean.modules.MoceanFactory;
 import com.mocean.modules.Transmitter;
+import com.mocean.system.auth.AuthInterface;
 
-public class Pricing extends com.mocean.modules.MoceanFactory {
+public class Pricing extends MoceanFactory {
 
-    public Pricing(Client client) {
-        super(client);
+    public Pricing(AuthInterface objAuth) {
+        super(objAuth);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret"};
     }
 

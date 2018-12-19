@@ -1,18 +1,25 @@
 package com.mocean.system;
 
+import com.mocean.exception.MoceanErrorException;
+import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.message.*;
 import com.mocean.modules.account.*;
+import com.mocean.system.auth.AuthInterface;
 
 
 public class Mocean {
 
-    private Client objAuth;
+    private AuthInterface objAuth;
 
-    public Mocean(Client objAuth) {
-        if (objAuth.getApiKey() == null || objAuth.getApiSecret() == null) {
-            throw new java.lang.Error("Api key and api secret for client object can't be empty.");
+    public Mocean(AuthInterface objAuth) throws MoceanErrorException, RequiredFieldException {
+        this.objAuth = objAuth;
+
+        if (objAuth.getAuthMethod().equalsIgnoreCase("basic")) {
+            if (objAuth.getParams().get("mocean-api-key") == null || objAuth.getParams().get("mocean-api-secret") == null) {
+                throw new RequiredFieldException("Api key and api secret for client object can't be empty.");
+            }
         } else {
-            this.objAuth = objAuth;
+            throw new MoceanErrorException("Unsupported Auth Method");
         }
     }
 
