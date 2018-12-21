@@ -1,9 +1,13 @@
 package com.mocean.modules.account;
 
+import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.ResponseHelper;
 import com.mocean.modules.Transmitter;
+import com.mocean.modules.mapper.BalanceResponse;
 import com.mocean.system.auth.AuthInterface;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 public class Balance extends MoceanFactory {
@@ -18,21 +22,22 @@ public class Balance extends MoceanFactory {
         return this;
     }
 
-    public String inquiry() throws Exception {
+    public BalanceResponse inquiry() throws MoceanErrorException, IOException {
         return this.send();
     }
 
-    public String inquiry(HashMap<String, String> params) throws Exception {
+    public BalanceResponse inquiry(HashMap<String, String> params) throws MoceanErrorException, IOException {
         this.create(params);
         return this.send();
     }
 
-    private String send() throws Exception {
+    private BalanceResponse send() throws MoceanErrorException, IOException {
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
         Transmitter httpRequest = new Transmitter("/rest/1/account/balance", "get", this.params);
-        return httpRequest.getResponse();
+        return ResponseHelper.createObjectFromRawResponse(httpRequest.getResponse(), BalanceResponse.class)
+                .setRawResponse(httpRequest.getResponse());
     }
 
 }

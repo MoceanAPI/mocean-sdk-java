@@ -1,9 +1,13 @@
 package com.mocean.modules.message;
 
+import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.ResponseHelper;
 import com.mocean.modules.Transmitter;
+import com.mocean.modules.mapper.SmsResponse;
 import com.mocean.system.auth.AuthInterface;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 public class Sms extends MoceanFactory {
@@ -94,7 +98,7 @@ public class Sms extends MoceanFactory {
         return this;
     }
 
-    public String send() throws Exception {
+    public SmsResponse send() throws MoceanErrorException, IOException {
         if (this.flashSms) {
             this.params.put("mocean-mclass", "1");
             this.params.put("mocean-alt-dcs", "1");
@@ -104,6 +108,7 @@ public class Sms extends MoceanFactory {
         this.isRequiredFieldsSet();
         Transmitter httpRequest = new Transmitter("/rest/1/sms", "post", this.params);
         this.reset();
-        return httpRequest.getResponse();
+        return ResponseHelper.createObjectFromRawResponse(httpRequest.getResponse(), SmsResponse.class)
+                .setRawResponse(httpRequest.getResponse());
     }
 }

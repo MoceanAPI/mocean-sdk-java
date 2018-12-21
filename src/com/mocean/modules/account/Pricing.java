@@ -1,9 +1,13 @@
 package com.mocean.modules.account;
 
+import java.io.IOException;
 import java.util.HashMap;
 
+import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.ResponseHelper;
 import com.mocean.modules.Transmitter;
+import com.mocean.modules.mapper.PricingResponse;
 import com.mocean.system.auth.AuthInterface;
 
 public class Pricing extends MoceanFactory {
@@ -33,20 +37,21 @@ public class Pricing extends MoceanFactory {
         return this;
     }
 
-    public String inquiry() throws Exception {
+    public PricingResponse inquiry() throws MoceanErrorException, IOException {
         return this.send();
     }
 
-    public String inquiry(HashMap<String, String> params) throws Exception {
+    public PricingResponse inquiry(HashMap<String, String> params) throws MoceanErrorException, IOException {
         this.create(params);
         return this.send();
     }
 
-    private String send() throws Exception {
+    private PricingResponse send() throws MoceanErrorException, IOException {
         this.createFinalParams();
         this.isRequiredFieldsSet();
         Transmitter httpRequest = new Transmitter("/rest/1/account/pricing", "get", this.params);
-        return httpRequest.getResponse();
+        return ResponseHelper.createObjectFromRawResponse(httpRequest.getResponse(), PricingResponse.class)
+                .setRawResponse(httpRequest.getResponse());
     }
 
 }

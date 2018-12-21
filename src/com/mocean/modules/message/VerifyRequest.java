@@ -1,9 +1,14 @@
 package com.mocean.modules.message;
 
+import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.ResponseHelper;
 import com.mocean.modules.Transmitter;
+import com.mocean.modules.mapper.ErrorResponse;
+import com.mocean.modules.mapper.VerifyRequestResponse;
 import com.mocean.system.auth.AuthInterface;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 public class VerifyRequest extends MoceanFactory {
@@ -58,11 +63,30 @@ public class VerifyRequest extends MoceanFactory {
         return this;
     }
 
-    public String send() throws Exception {
+    public VerifyRequestResponse send() throws MoceanErrorException, IOException {
         this.createFinalParams();
         this.isRequiredFieldsSet();
         Transmitter httpRequest = new Transmitter("/rest/1/verify/req", "post", this.params);
-        return httpRequest.getResponse();
+        VerifyRequestResponse verifyRequestResponse = ResponseHelper.createObjectFromRawResponse(httpRequest.getResponse()
+                        .replaceAll("<verify_request>", "")
+                        .replaceAll("</verify_request>", ""),
+                VerifyRequestResponse.class
+        ).setRawResponse(httpRequest.getResponse());
+
+        //temporary due to inconsistent error http status code
+        if (!verifyRequestResponse.getStatus().equalsIgnoreCase("0")) {
+            throw new MoceanErrorException(
+                    ResponseHelper.createObjectFromRawResponse(httpRequest.getResponse()
+                                    .replaceAll("<verify_request>", "")
+                                    .replaceAll("</verify_request>", "")
+                                    .replaceAll("<verify_check>", "")
+                                    .replaceAll("</verify_check>", ""),
+                            ErrorResponse.class
+                    ).setRawResponse(httpRequest.getResponse())
+            );
+        }
+
+        return verifyRequestResponse;
     }
 
 }

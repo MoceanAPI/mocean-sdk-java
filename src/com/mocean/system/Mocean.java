@@ -33,7 +33,7 @@ public class Mocean {
         return sms;
     }
 
-    public MessageStatus message_status() {
+    public MessageStatus messageStatus() {
         return new MessageStatus(this.objAuth);
     }
 
@@ -41,15 +41,15 @@ public class Mocean {
         return new Balance(this.objAuth);
     }
 
-    public Pricing pricing_list() {
+    public Pricing pricing() {
         return new Pricing(this.objAuth);
     }
 
-    public VerifyRequest verify_request() {
+    public VerifyRequest verifyRequest() {
         return new VerifyRequest(this.objAuth);
     }
 
-    public VerifyValidate verify_validate() {
+    public VerifyValidate verifyValidate() {
         return new VerifyValidate(this.objAuth);
     }
 }

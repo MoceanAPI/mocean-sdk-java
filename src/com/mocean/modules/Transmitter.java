@@ -1,9 +1,12 @@
 package com.mocean.modules;
 
 import com.mocean.exception.MoceanErrorException;
+import com.mocean.modules.mapper.ErrorResponse;
 
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -15,7 +18,7 @@ public class Transmitter {
     private String uri, response;
     private int responseCode;
 
-    public Transmitter(String uri, String method, HashMap<String, String> params) throws Exception {
+    public Transmitter(String uri, String method, HashMap<String, String> params) throws IOException {
         this.uri = uri;
         this.params = params;
         this.params.put("mocean-medium", "JAVA-SDK");
@@ -114,7 +117,15 @@ public class Transmitter {
 
     public String getResponse() throws MoceanErrorException {
         if (this.responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
-            throw new MoceanErrorException(this.response);
+            throw new MoceanErrorException(
+                    ResponseHelper.createObjectFromRawResponse(this.response
+                                    .replaceAll("<verify_request>", "")
+                                    .replaceAll("</verify_request>", "")
+                                    .replaceAll("<verify_check>", "")
+                                    .replaceAll("</verify_check>", ""),
+                            ErrorResponse.class
+                    ).setRawResponse(this.response)
+            );
         }
         return this.response;
     }

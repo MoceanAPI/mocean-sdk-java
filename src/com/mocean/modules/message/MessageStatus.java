@@ -1,10 +1,14 @@
 package com.mocean.modules.message;
 
+import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.MoceanFactory;
 
+import java.io.IOException;
 import java.util.HashMap;
 
+import com.mocean.modules.ResponseHelper;
 import com.mocean.modules.Transmitter;
+import com.mocean.modules.mapper.MessageStatusResponse;
 import com.mocean.system.auth.AuthInterface;
 
 public class MessageStatus extends MoceanFactory {
@@ -24,20 +28,21 @@ public class MessageStatus extends MoceanFactory {
         return this;
     }
 
-    public String inquiry(HashMap<String, String> params) throws Exception {
+    public MessageStatusResponse inquiry(HashMap<String, String> params) throws MoceanErrorException, IOException {
         super.create(params);
         return this.send();
     }
 
-    public String inquiry() throws Exception {
+    public MessageStatusResponse inquiry() throws MoceanErrorException, IOException {
         return this.send();
     }
 
-    private String send() throws Exception {
+    private MessageStatusResponse send() throws MoceanErrorException, IOException {
         this.createFinalParams();
         this.isRequiredFieldsSet();
         Transmitter httpRequest = new Transmitter("/rest/1/report/message", "get", this.params);
-        return httpRequest.getResponse();
+        return ResponseHelper.createObjectFromRawResponse(httpRequest.getResponse(), MessageStatusResponse.class)
+                .setRawResponse(httpRequest.getResponse());
     }
 
 }

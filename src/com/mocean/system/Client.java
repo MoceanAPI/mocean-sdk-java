@@ -1,8 +1,6 @@
 package com.mocean.system;
 
 import com.mocean.system.auth.AuthInterface;
-
-import java.util.Map;
 import java.util.HashMap;
 
 public class Client implements AuthInterface {
@@ -13,10 +11,10 @@ public class Client implements AuthInterface {
         this.params = new HashMap<String, String>();
     }
 
-    public Client(String api_key, String api_secret) {
+    public Client(String apiKey, String apiSecret) {
         this.params = new HashMap<String, String>();
-        this.params.put("mocean-api-key", api_key);
-        this.params.put("mocean-api-secret", api_secret);
+        this.params.put("mocean-api-key", apiKey);
+        this.params.put("mocean-api-secret", apiSecret);
     }
 
     public void setApiKey(String param) {
