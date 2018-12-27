@@ -1,58 +1,55 @@
 package com.mocean.system;
+
+import com.mocean.exception.MoceanErrorException;
+import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.message.*;
 import com.mocean.modules.account.*;
+import com.mocean.system.auth.AuthInterface;
 
 
 public class Mocean {
 
-	private Client obj_auth; 
-	
-	public Mocean(Client obj_auth) 
-	{
-		if(obj_auth.getApiKey() == null ||obj_auth.getApiSecret() == null) 
-		{
-			throw new java.lang.Error("Api key and api secret for client object can't be empty.");
-		}
-		else 
-		{
-			this.obj_auth = obj_auth;
-		}
-	}	
-	
-	public Sms sms()
-	{
-		return new Sms(this.obj_auth);
-	}
-	
-	public Sms flashSms() 
-	{
-		Sms sms = new Sms(this.obj_auth);
-		sms.flashSms = true;
-		return sms;
-	}
-	
-	public Message_status message_status()
-	{
-		return new Message_status(this.obj_auth);
-	}
-	
-	public Balance balance() 
-	{
-		return new Balance(this.obj_auth);
-	}
-	
-	public Pricing pricing_list()
-	{
-		return new Pricing(this.obj_auth);
-	}
-	
-	public Verify_request verify_request() 
-	{
-		return new Verify_request(this.obj_auth);
-	}
-	
-	public Verify_validate verify_validate()
-	{
-		return new Verify_validate(this.obj_auth);
-	}
+    private AuthInterface objAuth;
+
+    public Mocean(AuthInterface objAuth) throws MoceanErrorException, RequiredFieldException {
+        this.objAuth = objAuth;
+
+        if (objAuth.getAuthMethod().equalsIgnoreCase("basic")) {
+            if (objAuth.getParams().get("mocean-api-key") == null || objAuth.getParams().get("mocean-api-secret") == null) {
+                throw new RequiredFieldException("Api key and api secret for client object can't be empty.");
+            }
+        } else {
+            throw new MoceanErrorException("Unsupported Auth Method");
+        }
+    }
+
+    public Sms sms() {
+        return new Sms(this.objAuth);
+    }
+
+    public Sms flashSms() {
+        Sms sms = new Sms(this.objAuth);
+        sms.flashSms = true;
+        return sms;
+    }
+
+    public MessageStatus messageStatus() {
+        return new MessageStatus(this.objAuth);
+    }
+
+    public Balance balance() {
+        return new Balance(this.objAuth);
+    }
+
+    public Pricing pricing() {
+        return new Pricing(this.objAuth);
+    }
+
+    public VerifyRequest verifyRequest() {
+        return new VerifyRequest(this.objAuth);
+    }
+
+    public VerifyValidate verifyValidate() {
+        return new VerifyValidate(this.objAuth);
+    }
 }
