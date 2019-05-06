@@ -63,6 +63,14 @@ public class VerifyRequestTest {
     }
 
     @Test
+    public void testSendAsCPA() {
+        VerifyRequest verifyRequest = this.mocean.verifyRequest();
+        assertEquals(ChargeType.CHARGE_PER_CONVERSION, verifyRequest.verifyChargeType);
+        verifyRequest.sendAs(ChargeType.CHARGE_PER_ATTEMPT);
+        assertEquals(ChargeType.CHARGE_PER_ATTEMPT, verifyRequest.verifyChargeType);
+    }
+
+    @Test
     public void testJsonSend() {
         try {
             String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);

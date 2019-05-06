@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class VerifyRequest extends MoceanFactory {
+    public ChargeType verifyChargeType = ChargeType.CHARGE_PER_CONVERSION;
 
     public VerifyRequest(AuthInterface objAuth) {
         super(objAuth);
@@ -63,10 +64,21 @@ public class VerifyRequest extends MoceanFactory {
         return this;
     }
 
+    public VerifyRequest sendAs(ChargeType chargeType) {
+        this.verifyChargeType = chargeType;
+        return this;
+    }
+
     public VerifyRequestResponse send() throws MoceanErrorException, IOException {
         this.createFinalParams();
         this.isRequiredFieldsSet();
-        Transmitter httpRequest = new Transmitter("/rest/1/verify/req", "post", this.params);
+
+        String verifyRequestUrl = "/rest/1/verify/req";
+        if (this.verifyChargeType == ChargeType.CHARGE_PER_ATTEMPT) {
+            verifyRequestUrl += "/sms";
+        }
+
+        Transmitter httpRequest = new Transmitter(verifyRequestUrl, "post", this.params);
         VerifyRequestResponse verifyRequestResponse = ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse()
                         .replaceAll("<verify_request>", "")
                         .replaceAll("</verify_request>", ""),
