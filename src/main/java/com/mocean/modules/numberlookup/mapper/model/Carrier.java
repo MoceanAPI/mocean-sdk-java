@@ -13,11 +13,35 @@ public class Carrier {
     @JsonProperty("name")
     private String name;
 
+    @XmlElement(name = "network_code")
+    @JsonProperty("network_code")
+    private String networkCode;
+
+    @XmlElement(name = "mcc")
+    @JsonProperty("mcc")
+    private String mcc;
+
+    @XmlElement(name = "mnc")
+    @JsonProperty("mnc")
+    private String mnc;
+
     public String getCountry() {
         return country;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getNetworkCode() {
+        return networkCode;
+    }
+
+    public String getMcc() {
+        return mcc;
+    }
+
+    public String getMnc() {
+        return mnc;
     }
 }

@@ -20,10 +20,6 @@ public class NumberLookupResponse extends AbstractResponse {
     @JsonProperty("to")
     private String to;
 
-    @XmlElement(name = "imsi")
-    @JsonProperty("imsi")
-    private String imsi;
-
     @XmlElement(name = "current_carrier")
     @JsonProperty("current_carrier")
     private Carrier currentCarrier;
@@ -46,10 +42,6 @@ public class NumberLookupResponse extends AbstractResponse {
 
     public String getTo() {
         return to;
-    }
-
-    public String getImsi() {
-        return imsi;
     }
 
     public Carrier getCurrentCarrier() {
