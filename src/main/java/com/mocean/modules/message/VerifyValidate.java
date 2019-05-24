@@ -43,26 +43,9 @@ public class VerifyValidate extends AbstractClient {
         this.isRequiredFieldsSet();
 
         String responseStr = this.transmitter.post("/verify/check", this.params);
-        VerifyValidateResponse verifyValidateResponse = ResponseFactory.createObjectFromRawResponse(responseStr
-                        .replaceAll("<verify_check>", "")
-                        .replaceAll("</verify_check>", ""),
-                VerifyValidateResponse.class
-        ).setRawResponse(responseStr);
 
-        //temporary due to inconsistent error http status code
-        if (!verifyValidateResponse.getStatus().equalsIgnoreCase("0")) {
-            throw new MoceanErrorException(
-                    ResponseFactory.createObjectFromRawResponse(responseStr
-                                    .replaceAll("<verify_request>", "")
-                                    .replaceAll("</verify_request>", "")
-                                    .replaceAll("<verify_check>", "")
-                                    .replaceAll("</verify_check>", ""),
-                            ErrorResponse.class
-                    ).setRawResponse(responseStr)
-            );
-        }
-
-        return verifyValidateResponse;
+        return ResponseFactory.createObjectFromRawResponse(responseStr, VerifyValidateResponse.class)
+                .setRawResponse(responseStr);
     }
 
 }

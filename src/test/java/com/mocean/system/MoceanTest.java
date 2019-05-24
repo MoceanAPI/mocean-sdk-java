@@ -4,6 +4,7 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.system.auth.Basic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,28 +18,46 @@ public class MoceanTest {
 
     @Test
     public void testMoceanCreationFailedWhenNoApiKeyOrApiSecret() {
-        assertThrows(RequiredFieldException.class, () -> {
-            new Mocean(new Basic("test api key", ""));
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Mocean(new Basic("test api key", ""));
+            }
         });
 
-        assertThrows(RequiredFieldException.class, () -> {
-            new Mocean(new Basic("", "test api secret"));
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Mocean(new Basic("", "test api secret"));
+            }
         });
 
-        assertThrows(RequiredFieldException.class, () -> {
-            new Mocean(new Basic("", ""));
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Mocean(new Basic("", ""));
+            }
         });
 
-        assertThrows(RequiredFieldException.class, () -> {
-            new Mocean(new Basic("test api key", null));
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Mocean(new Basic("test api key", null));
+            }
         });
 
-        assertThrows(RequiredFieldException.class, () -> {
-            new Mocean(new Basic(null, "test api secret"));
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Mocean(new Basic(null, "test api secret"));
+            }
         });
 
-        assertThrows(RequiredFieldException.class, () -> {
-            new Mocean(new Basic());
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Mocean(new Basic());
+            }
         });
     }
 

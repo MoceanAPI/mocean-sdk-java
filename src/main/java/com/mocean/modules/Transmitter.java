@@ -6,6 +6,7 @@ import com.mocean.system.TransmitterConfig;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Transmitter {
     private TransmitterConfig transmitterConfig;
@@ -73,19 +74,35 @@ public class Transmitter {
         return this.formatResponse(response.toString(), responseCode);
     }
 
-    private String formatResponse(String responseString, int responseCode) throws MoceanErrorException {
+    protected String formatResponse(String responseString, int responseCode) throws MoceanErrorException {
+        //remove these field for v1, no effect for v2
+        String rawResponse = responseString
+                .replaceAll("<verify_request>", "")
+                .replaceAll("</verify_request>", "")
+                .replaceAll("<verify_check>", "")
+                .replaceAll("</verify_check>", "");
+
         if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
             throw new MoceanErrorException(
-                    ResponseFactory.createObjectFromRawResponse(responseString
-                                    .replaceAll("<verify_request>", "")
-                                    .replaceAll("</verify_request>", "")
-                                    .replaceAll("<verify_check>", "")
-                                    .replaceAll("</verify_check>", ""),
+                    ResponseFactory.createObjectFromRawResponse(
+                            rawResponse,
                             ErrorResponse.class
                     ).setRawResponse(responseString)
             );
         }
-        return responseString;
+
+        //these check is for v1 cause v1 http response code is not > 400, no effect for v2
+        Map<String, Object> tempParsedObject = ResponseFactory.createObjectFromRawResponse(responseString, Map.class);
+        if (tempParsedObject.get("status") != null && !tempParsedObject.get("status").toString().equalsIgnoreCase("0")) {
+            throw new MoceanErrorException(
+                    ResponseFactory.createObjectFromRawResponse(
+                            rawResponse,
+                            ErrorResponse.class
+                    ).setRawResponse(responseString)
+            );
+        }
+
+        return rawResponse;
     }
 
     private String urlEncodeUTF8(String s) {

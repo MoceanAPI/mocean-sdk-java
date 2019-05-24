@@ -12,7 +12,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class VerifyRequest extends AbstractClient {
-    public ChargeType verifyChargeType = ChargeType.CHARGE_PER_CONVERSION;
+    public Channel channel = Channel.AUTO;
+    public boolean isResend = false;
 
     public VerifyRequest(AuthInterface objAuth, Transmitter transmitter) {
         super(objAuth, transmitter);
@@ -54,6 +55,11 @@ public class VerifyRequest extends AbstractClient {
         return this;
     }
 
+    public VerifyRequest setReqId(String param){
+        this.params.put("mocean-reqid", param);
+        return this;
+    }
+
     public VerifyRequest setRespFormat(String param) {
         this.params.put("mocean-resp-format", param);
         return this;
@@ -64,8 +70,8 @@ public class VerifyRequest extends AbstractClient {
         return this;
     }
 
-    public VerifyRequest sendAs(ChargeType chargeType) {
-        this.verifyChargeType = chargeType;
+    public VerifyRequest sendAs(Channel channel) {
+        this.channel = channel;
         return this;
     }
 
@@ -73,32 +79,29 @@ public class VerifyRequest extends AbstractClient {
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
-        String verifyRequestUrl = "/rest/1/verify/req";
-        if (this.verifyChargeType == ChargeType.CHARGE_PER_ATTEMPT) {
+        String verifyRequestUrl = "/verify";
+        if (this.isResend) {
+            verifyRequestUrl += "/resend";
+        } else {
+            verifyRequestUrl += "/req";
+        }
+
+        if (this.channel == Channel.SMS) {
             verifyRequestUrl += "/sms";
         }
 
         String responseStr = this.transmitter.post(verifyRequestUrl, this.params);
-        VerifyRequestResponse verifyRequestResponse = ResponseFactory.createObjectFromRawResponse(responseStr
-                        .replaceAll("<verify_request>", "")
-                        .replaceAll("</verify_request>", ""),
-                VerifyRequestResponse.class
-        ).setRawResponse(responseStr);
 
-        //temporary due to inconsistent error http status code
-        if (!verifyRequestResponse.getStatus().equalsIgnoreCase("0")) {
-            throw new MoceanErrorException(
-                    ResponseFactory.createObjectFromRawResponse(responseStr
-                                    .replaceAll("<verify_request>", "")
-                                    .replaceAll("</verify_request>", "")
-                                    .replaceAll("<verify_check>", "")
-                                    .replaceAll("</verify_check>", ""),
-                            ErrorResponse.class
-                    ).setRawResponse(responseStr)
-            );
-        }
-
-        return verifyRequestResponse;
+        return ResponseFactory.createObjectFromRawResponse(responseStr, VerifyRequestResponse.class)
+                .setRawResponse(responseStr)
+                .setVerifyRequest(this);
     }
 
+    public VerifyRequestResponse resend() throws MoceanErrorException, IOException {
+        this.sendAs(Channel.SMS);
+        this.isResend = true;
+        this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-reqid"};
+
+        return this.send();
+    }
 }

@@ -2,10 +2,14 @@ package com.mocean.modules;
 
 import com.mocean.exception.MoceanErrorException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,5 +48,61 @@ class TransmitterTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         assertEquals("testing only", transmitterMock.post("test uri", new HashMap<>()));
+    }
+
+    //this is test for v1
+    @Test
+    public void testErrorResponseWith2xxStatusCode() throws IOException {
+        String jsonErrorResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "error_response.json")), StandardCharsets.UTF_8);
+        Transmitter transmitter = new Transmitter();
+
+        try {
+            transmitter.formatResponse(jsonErrorResponse, 202);
+            fail();
+        } catch (MoceanErrorException ex) {
+            assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
+            assertEquals(jsonErrorResponse, ex.getErrorResponse().toString());
+            assertEquals(ex.getErrorResponse().getStatus(), "1");
+        }
+
+        try {
+            transmitter.formatResponse(jsonErrorResponse, 200);
+        } catch (MoceanErrorException ex) {
+            assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
+            assertEquals(jsonErrorResponse, ex.getErrorResponse().toString());
+            assertEquals(ex.getErrorResponse().getStatus(), "1");
+        }
+
+        String xmlErrorResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "error_response.json")), StandardCharsets.UTF_8);
+
+        try {
+            transmitter.formatResponse(xmlErrorResponse, 202);
+        } catch (MoceanErrorException ex) {
+            assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
+            assertEquals(xmlErrorResponse, ex.getErrorResponse().toString());
+            assertEquals(ex.getErrorResponse().getStatus(), "1");
+        }
+
+        try {
+            transmitter.formatResponse(xmlErrorResponse, 200);
+        } catch (MoceanErrorException ex) {
+            assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
+            assertEquals(xmlErrorResponse, ex.getErrorResponse().toString());
+            assertEquals(ex.getErrorResponse().getStatus(), "1");
+        }
+    }
+
+    @Test
+    public void testErrorResponseWith4xxStatusCode() throws IOException {
+        String errorResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "error_response.json")), StandardCharsets.UTF_8);
+        Transmitter transmitter = new Transmitter();
+
+        try {
+            transmitter.formatResponse(errorResponse, 400);
+        } catch (MoceanErrorException ex) {
+            assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
+            assertEquals(errorResponse, ex.getErrorResponse().toString());
+            assertEquals(ex.getErrorResponse().getStatus(), "1");
+        }
     }
 }

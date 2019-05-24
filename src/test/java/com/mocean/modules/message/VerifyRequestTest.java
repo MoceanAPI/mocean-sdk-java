@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,6 +63,10 @@ public class VerifyRequestTest {
         assertNotNull(verifyRequest.getParams().get("mocean-next-event-wait"));
         assertEquals("test next event wait", verifyRequest.getParams().get("mocean-next-event-wait"));
 
+        verifyRequest.setReqId("test req id");
+        assertNotNull(verifyRequest.getParams().get("mocean-reqid"));
+        assertEquals("test req id", verifyRequest.getParams().get("mocean-reqid"));
+
         verifyRequest.setRespFormat("json");
         assertNotNull(verifyRequest.getParams().get("mocean-resp-format"));
         assertEquals("json", verifyRequest.getParams().get("mocean-resp-format"));
@@ -90,11 +95,81 @@ public class VerifyRequestTest {
     }
 
     @Test
-    public void testSendAsCPA() {
-        VerifyRequest verifyRequest = this.mocean.verifyRequest();
-        assertEquals(ChargeType.CHARGE_PER_CONVERSION, verifyRequest.verifyChargeType);
-        verifyRequest.sendAs(ChargeType.CHARGE_PER_ATTEMPT);
-        assertEquals(ChargeType.CHARGE_PER_ATTEMPT, verifyRequest.verifyChargeType);
+    public void testSendAsSmsChannel() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/verify/req/sms", invocationOnMock.getArgument(1));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        VerifyRequest verifyRequest = mocean.verifyRequest();
+        assertEquals(Channel.AUTO, verifyRequest.channel);
+        verifyRequest.sendAs(Channel.SMS);
+        assertEquals(Channel.SMS, verifyRequest.channel);
+        verifyRequest
+                .setTo("testing to")
+                .setBrand("testing brand")
+                .send();
+    }
+
+    @Test
+    public void testResend() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/verify/resend/sms", invocationOnMock.getArgument(1));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        mocean.verifyRequest()
+                .setReqId("testing req id")
+                .resend();
+    }
+
+    @Test
+    public void testResendThroughResponseObject() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/verify/resend/sms", invocationOnMock.getArgument(1));
+                        assertEquals("CPASS_restapi_C0000002737000000.0002", ((HashMap<String, String>) invocationOnMock.getArgument(2)).get("mocean-reqid"));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "resend_code.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        String sendCodeSampleResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
+        VerifyRequestResponse res = ResponseFactory.createObjectFromRawResponse(sendCodeSampleResponse, VerifyRequestResponse.class)
+                .setRawResponse(sendCodeSampleResponse)
+                .setVerifyRequest(mocean.verifyRequest());
+
+        VerifyRequestResponse resendRes = res.resend();
+        assertEquals(resendRes.getStatus(), "0");
+        assertEquals(resendRes.getReqId(), "CPASS_restapi_C0000002737000000.0002");
+        assertEquals(resendRes.getTo(), "60123456789");
+        assertEquals(resendRes.getResendNumber(), "1");
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test

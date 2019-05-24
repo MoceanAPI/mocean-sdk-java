@@ -1,5 +1,6 @@
 package com.mocean.modules.numberlookup.mapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mocean.modules.AbstractResponse;
 import com.mocean.modules.numberlookup.mapper.model.Carrier;
@@ -11,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NumberLookupResponse extends AbstractResponse {
     @XmlElement(name = "msgid")
     @JsonProperty("msgid")

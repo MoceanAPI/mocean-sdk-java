@@ -1,5 +1,6 @@
 package com.mocean.modules.account.mapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mocean.modules.AbstractResponse;
 
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BalanceResponse extends AbstractResponse {
     @XmlElement(name = "value")
     @JsonProperty("value")
