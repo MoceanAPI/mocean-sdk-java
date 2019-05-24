@@ -1,7 +1,7 @@
 package com.mocean.modules.account;
 
 import com.mocean.exception.MoceanErrorException;
-import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.account.mapper.BalanceResponse;
@@ -10,10 +10,10 @@ import com.mocean.system.auth.AuthInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Balance extends MoceanFactory {
+public class Balance extends AbstractClient {
 
-    public Balance(AuthInterface objAuth) {
-        super(objAuth);
+    public Balance(AuthInterface objAuth, Transmitter transmitter) {
+        super(objAuth, transmitter);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret"};
     }
 
@@ -35,9 +35,9 @@ public class Balance extends MoceanFactory {
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
-        Transmitter httpRequest = new Transmitter("/rest/1/account/balance", "get", this.params);
-        return ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse(), BalanceResponse.class)
-                .setRawResponse(httpRequest.getResponse());
+        String responseStr = this.transmitter.get("/account/balance", this.params);
+        return ResponseFactory.createObjectFromRawResponse(responseStr, BalanceResponse.class)
+                .setRawResponse(responseStr);
     }
 
 }

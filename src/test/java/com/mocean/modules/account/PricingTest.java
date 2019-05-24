@@ -3,11 +3,14 @@ package com.mocean.modules.account;
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.ResponseFactory;
+import com.mocean.modules.Transmitter;
 import com.mocean.modules.account.mapper.PricingResponse;
 import com.mocean.system.Mocean;
 import com.mocean.utils.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,8 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class PricingTest {
     private Mocean mocean;
@@ -48,7 +50,26 @@ public class PricingTest {
     }
 
     @Test
-    public void testJsonInquiry() {
+    public void testInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("get", invocationOnMock.getArgument(0));
+                        assertEquals("/account/pricing", invocationOnMock.getArgument(1));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "price.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        mocean.pricing().inquiry();
+    }
+
+    @Test
+    public void testJsonResponseObject() {
         try {
             String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "price.json")), StandardCharsets.UTF_8);
 
@@ -62,8 +83,7 @@ public class PricingTest {
 
             PricingResponse pricingResponse = pricingMock.inquiry();
             assertEquals(pricingResponse.toString(), jsonResponse);
-            assertEquals(pricingResponse.getStatus(), "0");
-            assertTrue(Utils.isArray(pricingResponse.getDestinations()));
+            this.testObject(pricingResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -71,7 +91,7 @@ public class PricingTest {
     }
 
     @Test
-    public void testXmlInquiry() {
+    public void testXmlResponseObject() {
         try {
             String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "price.xml")), StandardCharsets.UTF_8);
 
@@ -85,8 +105,7 @@ public class PricingTest {
 
             PricingResponse pricingResponse = pricingMock.inquiry();
             assertEquals(pricingResponse.toString(), xmlResponse);
-            assertEquals(pricingResponse.getStatus(), "0");
-            assertTrue(Utils.isArray(pricingResponse.getDestinations()));
+            this.testObject(pricingResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -102,5 +121,17 @@ public class PricingTest {
             fail();
         } catch (MoceanErrorException ignored) {
         }
+    }
+
+    private void testObject(PricingResponse pricingResponse) {
+        assertEquals(pricingResponse.getStatus(), "0");
+        assertEquals(pricingResponse.getDestinations().length, 25);
+        assertEquals(pricingResponse.getDestinations()[0].getCountry(), "Default");
+        assertEquals(pricingResponse.getDestinations()[0].getOperator(), "Default");
+        assertEquals(pricingResponse.getDestinations()[0].getMcc(), "Default");
+        assertEquals(pricingResponse.getDestinations()[0].getMnc(), "Default");
+        assertEquals(pricingResponse.getDestinations()[0].getPrice(), "2.0000");
+        assertEquals(pricingResponse.getDestinations()[0].getCurrency(), "MYR");
+        assertTrue(Utils.isArray(pricingResponse.getDestinations()));
     }
 }

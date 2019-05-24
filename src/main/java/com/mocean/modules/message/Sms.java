@@ -1,7 +1,7 @@
 package com.mocean.modules.message;
 
 import com.mocean.exception.MoceanErrorException;
-import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.SmsResponse;
@@ -10,12 +10,12 @@ import com.mocean.system.auth.AuthInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Sms extends MoceanFactory {
+public class Sms extends AbstractClient {
 
     public Boolean flashSms = false;
 
-    public Sms(AuthInterface objAuth) {
-        super(objAuth);
+    public Sms(AuthInterface objAuth, Transmitter transmitter) {
+        super(objAuth, transmitter);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-from", "mocean-to", "mocean-text"};
     }
 
@@ -106,9 +106,10 @@ public class Sms extends MoceanFactory {
 
         this.createFinalParams();
         this.isRequiredFieldsSet();
-        Transmitter httpRequest = new Transmitter("/rest/1/sms", "post", this.params);
+
+        String responseStr = this.transmitter.post("/sms", this.params);
         this.reset();
-        return ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse(), SmsResponse.class)
-                .setRawResponse(httpRequest.getResponse());
+        return ResponseFactory.createObjectFromRawResponse(responseStr, SmsResponse.class)
+                .setRawResponse(responseStr);
     }
 }

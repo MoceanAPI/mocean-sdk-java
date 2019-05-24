@@ -1,132 +1,91 @@
 package com.mocean.modules;
 
 import com.mocean.exception.MoceanErrorException;
+import com.mocean.system.TransmitterConfig;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.HashMap;
 
 public class Transmitter {
+    private TransmitterConfig transmitterConfig;
 
-    private final String DOMAIN = "https://rest-api.moceansms.com";
-    private final String USER_AGENT = "Mozilla/5.0";
-    private HashMap<String, String> params;
-    private String uri, response;
-    private int responseCode;
-
-    public Transmitter(String uri, String method, HashMap<String, String> params) throws IOException {
-        this.uri = uri;
-        this.params = params;
-        this.params.put("mocean-medium", "JAVA-SDK");
-        switch (method.toLowerCase()) {
-            case "get":
-                this.__get();
-                break;
-            case "post":
-                this.__post();
-                break;
-            case "put":
-                this.__put();
-                break;
-            case "delete":
-                this.__delete();
-                break;
-        }
+    public Transmitter() {
+        this(TransmitterConfig.make());
     }
 
-    private void __post() throws IOException {
-        URL obj = new URL(DOMAIN + this.uri);
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+    public Transmitter(TransmitterConfig transmitterConfig) {
+        this.transmitterConfig = transmitterConfig;
+    }
 
-        //add reuqest header
-        con.setRequestMethod("POST");
-        con.setRequestProperty("User-Agent", USER_AGENT);
+    public String get(String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
+        return this.send("get", uri, params);
+    }
 
-        // Send post request
-        con.setDoOutput(true);
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(this.urlEncodeUTF8(this.params));
-        wr.flush();
-        wr.close();
+    public String post(String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
+        return this.send("post", uri, params);
+    }
 
-        this.responseCode = con.getResponseCode();
+    public String send(String method, String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
+        params.put("mocean-medium", "JAVA-SDK");
+
+        //use json if default not set
+        if (!params.containsKey("mocean-resp-format")) {
+            params.put("mocean-resp-format", "json");
+        }
+
+        URL url;
+        if (method.equalsIgnoreCase("get")) {
+            url = new URL(this.transmitterConfig.getBaseUrl() + "/rest/" + this.transmitterConfig.getVersion() + uri + "?" + this.urlEncodeUTF8(params));
+        } else {
+            url = new URL(this.transmitterConfig.getBaseUrl() + "/rest/" + this.transmitterConfig.getVersion() + uri);
+        }
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod(method.toUpperCase());
+
+        if (method.equalsIgnoreCase("post")) {
+            connection.setDoOutput(true);
+            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            wr.writeBytes(this.urlEncodeUTF8(params));
+            wr.flush();
+            wr.close();
+        }
+
+        int responseCode = connection.getResponseCode();
 
         InputStream resultStream;
-
-        if (this.responseCode < HttpURLConnection.HTTP_BAD_REQUEST) {
-            resultStream = con.getInputStream();
+        if (responseCode < HttpURLConnection.HTTP_BAD_REQUEST) {
+            resultStream = connection.getInputStream();
         } else {
-            resultStream = con.getErrorStream();
+            resultStream = connection.getErrorStream();
         }
 
         BufferedReader in = new BufferedReader(new InputStreamReader(resultStream));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
+        String inputLine;
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
         }
         in.close();
 
-        this.response = response.toString();
+        return this.formatResponse(response.toString(), responseCode);
     }
 
-    private void __get() throws IOException {
-        URL obj = new URL(DOMAIN + this.uri + "?" + this.urlEncodeUTF8(this.params));
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-
-        // optional default is GET
-        con.setRequestMethod("GET");
-
-        //add request header
-        con.setRequestProperty("User-Agent", USER_AGENT);
-
-        this.responseCode = con.getResponseCode();
-
-        InputStream resultStream;
-
-        if (this.responseCode < HttpURLConnection.HTTP_BAD_REQUEST) {
-            resultStream = con.getInputStream();
-        } else {
-            resultStream = con.getErrorStream();
-        }
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(resultStream));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        this.response = response.toString();
-    }
-
-    private void __put() {
-
-    }
-
-    private void __delete() {
-
-    }
-
-    public String getResponse() throws MoceanErrorException {
-        if (this.responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+    private String formatResponse(String responseString, int responseCode) throws MoceanErrorException {
+        if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
             throw new MoceanErrorException(
-                    ResponseFactory.createObjectFromRawResponse(this.response
+                    ResponseFactory.createObjectFromRawResponse(responseString
                                     .replaceAll("<verify_request>", "")
                                     .replaceAll("</verify_request>", "")
                                     .replaceAll("<verify_check>", "")
                                     .replaceAll("</verify_check>", ""),
                             ErrorResponse.class
-                    ).setRawResponse(this.response)
+                    ).setRawResponse(responseString)
             );
         }
-        return this.response;
+        return responseString;
     }
 
     private String urlEncodeUTF8(String s) {
@@ -145,8 +104,8 @@ public class Transmitter {
             }
 
             sb.append(String.format("%s=%s",
-                    urlEncodeUTF8(entry.getKey().toString()),
-                    urlEncodeUTF8(entry.getValue().toString())
+                    urlEncodeUTF8(entry.getKey()),
+                    urlEncodeUTF8(entry.getValue())
             ));
         }
         return sb.toString();

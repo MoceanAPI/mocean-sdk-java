@@ -3,11 +3,14 @@ package com.mocean.modules.message;
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.ResponseFactory;
+import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.SmsResponse;
 import com.mocean.system.Mocean;
 import com.mocean.utils.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,8 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class SmsTest {
     private Mocean mocean;
@@ -84,7 +86,30 @@ public class SmsTest {
     }
 
     @Test
-    public void testJsonSend() {
+    public void testInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/sms", invocationOnMock.getArgument(1));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        mocean.sms()
+                .setFrom("testing from")
+                .setTo("testing to")
+                .setText("testing text")
+                .send();
+    }
+
+    @Test
+    public void testJsonResponseObject() {
         try {
             String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.json")), StandardCharsets.UTF_8);
 
@@ -98,8 +123,7 @@ public class SmsTest {
 
             SmsResponse smsResponse = smsMock.send();
             assertEquals(smsResponse.toString(), jsonResponse);
-            assertTrue(Utils.isArray(smsResponse.getMessages()));
-            assertEquals(smsResponse.getMessages()[0].getStatus(), "0");
+            this.testObject(smsResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -107,7 +131,7 @@ public class SmsTest {
     }
 
     @Test
-    public void testXmlSend() {
+    public void testXmlResponseObject() {
         try {
             String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.xml")), StandardCharsets.UTF_8);
 
@@ -121,8 +145,7 @@ public class SmsTest {
 
             SmsResponse smsResponse = smsMock.send();
             assertEquals(smsResponse.toString(), xmlResponse);
-            assertTrue(Utils.isArray(smsResponse.getMessages()));
-            assertEquals(smsResponse.getMessages()[0].getStatus(), "0");
+            this.testObject(smsResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -138,5 +161,12 @@ public class SmsTest {
             fail();
         } catch (MoceanErrorException ignored) {
         }
+    }
+
+    private void testObject(SmsResponse smsResponse) {
+        assertTrue(Utils.isArray(smsResponse.getMessages()));
+        assertEquals(smsResponse.getMessages()[0].getStatus(), "0");
+        assertEquals(smsResponse.getMessages()[0].getReceiver(), "60123456789");
+        assertEquals(smsResponse.getMessages()[0].getMsgId(), "CPASS_restapi_C0000002737000000.0001");
     }
 }

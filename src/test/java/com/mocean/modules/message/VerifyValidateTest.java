@@ -3,10 +3,13 @@ package com.mocean.modules.message;
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.ResponseFactory;
+import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.VerifyValidateResponse;
 import com.mocean.system.Mocean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,8 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 
 public class VerifyValidateTest {
     private Mocean mocean;
@@ -43,7 +48,29 @@ public class VerifyValidateTest {
     }
 
     @Test
-    public void testJsonSend() {
+    public void testInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/verify/check", invocationOnMock.getArgument(1));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "verify_code.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        mocean.verifyValidate()
+                .setReqid("testing req id")
+                .setCode("testing code")
+                .send();
+    }
+
+    @Test
+    public void testJsonResponseObject() {
         try {
             String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "verify_code.json")), StandardCharsets.UTF_8);
 
@@ -57,7 +84,7 @@ public class VerifyValidateTest {
 
             VerifyValidateResponse verifyValidateResponse = verifyValidateMock.send();
             assertEquals(verifyValidateResponse.toString(), jsonResponse);
-            assertEquals(verifyValidateResponse.getStatus(), "0");
+            this.testObject(verifyValidateResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -65,7 +92,7 @@ public class VerifyValidateTest {
     }
 
     @Test
-    public void testXmlSend() {
+    public void testXmlResponseObject() {
         try {
             String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "verify_code.xml")), StandardCharsets.UTF_8);
 
@@ -82,7 +109,7 @@ public class VerifyValidateTest {
 
             VerifyValidateResponse verifyValidateResponse = verifyValidateMock.send();
             assertEquals(verifyValidateResponse.toString(), xmlResponse);
-            assertEquals(verifyValidateResponse.getStatus(), "0");
+            this.testObject(verifyValidateResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -98,5 +125,13 @@ public class VerifyValidateTest {
             fail();
         } catch (MoceanErrorException ignored) {
         }
+    }
+
+    private void testObject(VerifyValidateResponse verifyValidateResponse) {
+        assertEquals(verifyValidateResponse.getStatus(), "0");
+        assertEquals(verifyValidateResponse.getReqId(), "CPASS_restapi_C0000002737000000.0002");
+        assertEquals(verifyValidateResponse.getMsgId(), "CPASS_restapi_C0000002737000000.0002");
+        assertEquals(verifyValidateResponse.getPrice(), "0.35");
+        assertEquals(verifyValidateResponse.getCurrency(), "MYR");
     }
 }

@@ -1,7 +1,7 @@
 package com.mocean.modules.message;
 
 import com.mocean.exception.MoceanErrorException;
-import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.MessageStatusResponse;
@@ -10,10 +10,10 @@ import com.mocean.system.auth.AuthInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class MessageStatus extends MoceanFactory {
+public class MessageStatus extends AbstractClient {
 
-    public MessageStatus(AuthInterface objAuth) {
-        super(objAuth);
+    public MessageStatus(AuthInterface objAuth, Transmitter transmitter) {
+        super(objAuth, transmitter);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-msgid"};
     }
 
@@ -39,9 +39,10 @@ public class MessageStatus extends MoceanFactory {
     private MessageStatusResponse send() throws MoceanErrorException, IOException {
         this.createFinalParams();
         this.isRequiredFieldsSet();
-        Transmitter httpRequest = new Transmitter("/rest/1/report/message", "get", this.params);
-        return ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse(), MessageStatusResponse.class)
-                .setRawResponse(httpRequest.getResponse());
+
+        String responseStr = this.transmitter.get("/report/message", this.params);
+        return ResponseFactory.createObjectFromRawResponse(responseStr, MessageStatusResponse.class)
+                .setRawResponse(responseStr);
     }
 
 }

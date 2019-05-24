@@ -3,10 +3,13 @@ package com.mocean.modules.account;
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.ResponseFactory;
+import com.mocean.modules.Transmitter;
 import com.mocean.modules.account.mapper.BalanceResponse;
 import com.mocean.system.Mocean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,8 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 public class BalanceTest {
     private Mocean mocean;
@@ -34,7 +37,26 @@ public class BalanceTest {
     }
 
     @Test
-    public void testJsonInquiry() {
+    public void testInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("get", invocationOnMock.getArgument(0));
+                        assertEquals("/account/balance", invocationOnMock.getArgument(1));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "balance.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        mocean.balance().inquiry();
+    }
+
+    @Test
+    public void testJsonResponseObject() {
         try {
             String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "balance.json")), StandardCharsets.UTF_8);
 
@@ -48,7 +70,7 @@ public class BalanceTest {
 
             BalanceResponse balanceResponse = balanceMock.inquiry();
             assertEquals(balanceResponse.toString(), jsonResponse);
-            assertEquals(balanceResponse.getStatus(), "0");
+            this.testObject(balanceResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -56,7 +78,7 @@ public class BalanceTest {
     }
 
     @Test
-    public void testXmlInquiry() {
+    public void testXmlResponseObject() {
         try {
             String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "balance.xml")), StandardCharsets.UTF_8);
 
@@ -70,7 +92,7 @@ public class BalanceTest {
 
             BalanceResponse balanceResponse = balanceMock.inquiry();
             assertEquals(balanceResponse.toString(), xmlResponse);
-            assertEquals(balanceResponse.getStatus(), "0");
+            this.testObject(balanceResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -86,5 +108,10 @@ public class BalanceTest {
             fail();
         } catch (MoceanErrorException ignored) {
         }
+    }
+
+    private void testObject(BalanceResponse balanceResponse) {
+        assertEquals(balanceResponse.getStatus(), "0");
+        assertEquals(balanceResponse.getValue(), "100.0000");
     }
 }

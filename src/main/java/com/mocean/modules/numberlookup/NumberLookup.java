@@ -1,7 +1,7 @@
 package com.mocean.modules.numberlookup;
 
 import com.mocean.exception.MoceanErrorException;
-import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.numberlookup.mapper.NumberLookupResponse;
@@ -10,10 +10,10 @@ import com.mocean.system.auth.AuthInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class NumberLookup extends MoceanFactory {
+public class NumberLookup extends AbstractClient {
 
-    public NumberLookup(AuthInterface objAuth) {
-        super(objAuth);
+    public NumberLookup(AuthInterface objAuth, Transmitter transmitter) {
+        super(objAuth, transmitter);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-to"};
     }
 
@@ -36,7 +36,7 @@ public class NumberLookup extends MoceanFactory {
         return this.send();
     }
 
-    public NumberLookupResponse inquiry(HashMap<String, String> params) throws MoceanErrorException, IOException {
+    public NumberLookupResponse send(HashMap<String, String> params) throws MoceanErrorException, IOException {
         this.create(params);
         return this.send();
     }
@@ -45,8 +45,8 @@ public class NumberLookup extends MoceanFactory {
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
-        Transmitter httpRequest = new Transmitter("/rest/1/nl", "get", this.params);
-        return ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse(), NumberLookupResponse.class)
-                .setRawResponse(httpRequest.getResponse());
+        String responseStr = this.transmitter.get("/nl", this.params);
+        return ResponseFactory.createObjectFromRawResponse(responseStr, NumberLookupResponse.class)
+                .setRawResponse(responseStr);
     }
 }

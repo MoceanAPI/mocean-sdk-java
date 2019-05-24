@@ -3,10 +3,13 @@ package com.mocean.modules.message;
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.ResponseFactory;
+import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.VerifyRequestResponse;
 import com.mocean.system.Mocean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,8 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 
 public class VerifyRequestTest {
     private Mocean mocean;
@@ -63,6 +68,28 @@ public class VerifyRequestTest {
     }
 
     @Test
+    public void testInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/verify/req", invocationOnMock.getArgument(1));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        mocean.verifyRequest()
+                .setTo("testing to")
+                .setBrand("testing brand")
+                .send();
+    }
+
+    @Test
     public void testSendAsCPA() {
         VerifyRequest verifyRequest = this.mocean.verifyRequest();
         assertEquals(ChargeType.CHARGE_PER_CONVERSION, verifyRequest.verifyChargeType);
@@ -71,7 +98,7 @@ public class VerifyRequestTest {
     }
 
     @Test
-    public void testJsonSend() {
+    public void testJsonResponseObject() {
         try {
             String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
 
@@ -85,7 +112,7 @@ public class VerifyRequestTest {
 
             VerifyRequestResponse verifyRequestResponse = verifyRequestMock.send();
             assertEquals(verifyRequestResponse.toString(), jsonResponse);
-            assertEquals(verifyRequestResponse.getStatus(), "0");
+            this.testObject(verifyRequestResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -93,7 +120,7 @@ public class VerifyRequestTest {
     }
 
     @Test
-    public void testXmlSend() {
+    public void testXmlResponseObject() {
         try {
             String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.xml")), StandardCharsets.UTF_8);
 
@@ -110,7 +137,7 @@ public class VerifyRequestTest {
 
             VerifyRequestResponse verifyRequestResponse = verifyRequestMock.send();
             assertEquals(verifyRequestResponse.toString(), xmlResponse);
-            assertEquals(verifyRequestResponse.getStatus(), "0");
+            this.testObject(verifyRequestResponse);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -126,5 +153,10 @@ public class VerifyRequestTest {
             fail();
         } catch (MoceanErrorException ignored) {
         }
+    }
+
+    private void testObject(VerifyRequestResponse verifyRequestResponse) {
+        assertEquals(verifyRequestResponse.getStatus(), "0");
+        assertEquals(verifyRequestResponse.getReqId(), "CPASS_restapi_C0000002737000000.0002");
     }
 }

@@ -1,7 +1,7 @@
 package com.mocean.modules.account;
 
 import com.mocean.exception.MoceanErrorException;
-import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.account.mapper.PricingResponse;
@@ -10,10 +10,10 @@ import com.mocean.system.auth.AuthInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Pricing extends MoceanFactory {
+public class Pricing extends AbstractClient {
 
-    public Pricing(AuthInterface objAuth) {
-        super(objAuth);
+    public Pricing(AuthInterface objAuth, Transmitter transmitter) {
+        super(objAuth, transmitter);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret"};
     }
 
@@ -49,9 +49,10 @@ public class Pricing extends MoceanFactory {
     private PricingResponse send() throws MoceanErrorException, IOException {
         this.createFinalParams();
         this.isRequiredFieldsSet();
-        Transmitter httpRequest = new Transmitter("/rest/1/account/pricing", "get", this.params);
-        return ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse(), PricingResponse.class)
-                .setRawResponse(httpRequest.getResponse());
+
+        String responseStr = this.transmitter.get("/account/pricing", this.params);
+        return ResponseFactory.createObjectFromRawResponse(responseStr, PricingResponse.class)
+                .setRawResponse(responseStr);
     }
 
 }

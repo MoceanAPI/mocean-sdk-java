@@ -7,15 +7,17 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MoceanFactory {
+public class AbstractClient {
 
     protected HashMap<String, String> params;
     protected String[] requiredFields;
 
     private AuthInterface objAuth;
+    protected Transmitter transmitter;
 
-    public MoceanFactory(AuthInterface objAuth) {
+    public AbstractClient(AuthInterface objAuth, Transmitter transmitter) {
         this.objAuth = objAuth;
+        this.transmitter = transmitter;
         this.params = objAuth.getParams();
         this.requiredFields = new String[0];
     }
@@ -49,7 +51,7 @@ public class MoceanFactory {
         this.params = newParams;
     }
 
-    protected MoceanFactory create(HashMap<String, String> params) {
+    protected AbstractClient create(HashMap<String, String> params) {
         this.params.putAll(params);
         return this;
     }

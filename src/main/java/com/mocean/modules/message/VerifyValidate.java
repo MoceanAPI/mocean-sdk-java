@@ -2,7 +2,7 @@ package com.mocean.modules.message;
 
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.modules.ErrorResponse;
-import com.mocean.modules.MoceanFactory;
+import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.VerifyValidateResponse;
@@ -11,10 +11,10 @@ import com.mocean.system.auth.AuthInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class VerifyValidate extends MoceanFactory {
+public class VerifyValidate extends AbstractClient {
 
-    public VerifyValidate(AuthInterface objAuth) {
-        super(objAuth);
+    public VerifyValidate(AuthInterface objAuth, Transmitter transmitter) {
+        super(objAuth, transmitter);
         this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-reqid", "mocean-code"};
     }
 
@@ -42,23 +42,23 @@ public class VerifyValidate extends MoceanFactory {
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
-        Transmitter httpRequest = new Transmitter("/rest/1/verify/check", "post", this.params);
-        VerifyValidateResponse verifyValidateResponse = ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse()
+        String responseStr = this.transmitter.post("/verify/check", this.params);
+        VerifyValidateResponse verifyValidateResponse = ResponseFactory.createObjectFromRawResponse(responseStr
                         .replaceAll("<verify_check>", "")
                         .replaceAll("</verify_check>", ""),
                 VerifyValidateResponse.class
-        ).setRawResponse(httpRequest.getResponse());
+        ).setRawResponse(responseStr);
 
         //temporary due to inconsistent error http status code
         if (!verifyValidateResponse.getStatus().equalsIgnoreCase("0")) {
             throw new MoceanErrorException(
-                    ResponseFactory.createObjectFromRawResponse(httpRequest.getResponse()
+                    ResponseFactory.createObjectFromRawResponse(responseStr
                                     .replaceAll("<verify_request>", "")
                                     .replaceAll("</verify_request>", "")
                                     .replaceAll("<verify_check>", "")
                                     .replaceAll("</verify_check>", ""),
                             ErrorResponse.class
-                    ).setRawResponse(httpRequest.getResponse())
+                    ).setRawResponse(responseStr)
             );
         }
 
