@@ -12,6 +12,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -59,61 +60,72 @@ public class MessageStatusTest {
         mocean.messageStatus()
                 .setMsgid("test msg id")
                 .inquiry();
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testJsonResponseObject() {
-        try {
-            String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_status.json")), StandardCharsets.UTF_8);
+    public void testJsonResponseObject() throws IOException, MoceanErrorException {
+        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_status.json")), StandardCharsets.UTF_8);
 
-            MessageStatus messageStatusMock = mock(MessageStatus.class);
-            when(messageStatusMock.inquiry())
-                    .thenReturn(
-                            ResponseFactory
-                                    .createObjectFromRawResponse(jsonResponse, MessageStatusResponse.class)
-                                    .setRawResponse(jsonResponse)
-                    );
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("get", invocationOnMock.getArgument(0));
+                        assertEquals("/report/message", invocationOnMock.getArgument(1));
 
-            MessageStatusResponse messageStatusResponse = messageStatusMock.inquiry();
-            assertEquals(messageStatusResponse.toString(), jsonResponse);
-            this.testObject(messageStatusResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+                        return transmitterMock.formatResponse(
+                                jsonResponse,
+                                HttpURLConnection.HTTP_OK,
+                                false,
+                                "/report/message"
+                        );
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        MessageStatusResponse messageStatusResponse = mocean.messageStatus()
+                .setMsgid("test msg id")
+                .inquiry();
+        assertEquals(messageStatusResponse.toString(), jsonResponse);
+        this.testObject(messageStatusResponse);
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testXmlResponseObject() {
-        try {
-            String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_status.xml")), StandardCharsets.UTF_8);
+    public void testXmlResponseObject() throws IOException, MoceanErrorException {
+        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_status.json")), StandardCharsets.UTF_8);
 
-            MessageStatus messageStatusMock = mock(MessageStatus.class);
-            when(messageStatusMock.inquiry())
-                    .thenReturn(
-                            ResponseFactory
-                                    .createObjectFromRawResponse(xmlResponse, MessageStatusResponse.class)
-                                    .setRawResponse(xmlResponse)
-                    );
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("get", invocationOnMock.getArgument(0));
+                        assertEquals("/report/message", invocationOnMock.getArgument(1));
 
-            MessageStatusResponse messageStatusResponse = messageStatusMock.inquiry();
-            assertEquals(messageStatusResponse.toString(), xmlResponse);
-            this.testObject(messageStatusResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
+                        return transmitterMock.formatResponse(
+                                xmlResponse,
+                                HttpURLConnection.HTTP_OK,
+                                true,
+                                "/report/message"
+                        );
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
 
-    @Test
-    public void testMalformedResponse() throws IOException {
-        try {
-            ResponseFactory
-                    .createObjectFromRawResponse("malform string", MessageStatusResponse.class)
-                    .setRawResponse("malform string");
-            fail();
-        } catch (MoceanErrorException ignored) {
-        }
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        MessageStatusResponse messageStatusResponse = mocean.messageStatus()
+                .setMsgid("test msg id")
+                .inquiry();
+        assertEquals(messageStatusResponse.toString(), xmlResponse);
+        this.testObject(messageStatusResponse);
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(MessageStatusResponse messageStatusResponse) {

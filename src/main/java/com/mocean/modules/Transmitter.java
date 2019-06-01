@@ -2,14 +2,18 @@ package com.mocean.modules;
 
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.system.TransmitterConfig;
+import com.mocean.utils.Utils;
 
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Transmitter {
     private TransmitterConfig transmitterConfig;
+    private String rawResponse;
 
     public Transmitter() {
         this(TransmitterConfig.make());
@@ -71,38 +75,52 @@ public class Transmitter {
         }
         in.close();
 
-        return this.formatResponse(response.toString(), responseCode);
+        return this.formatResponse(response.toString(), responseCode, params.get("mocean-resp-format").equalsIgnoreCase("xml"), uri);
     }
 
-    protected String formatResponse(String responseString, int responseCode) throws MoceanErrorException {
+    public String formatResponse(String responseString, int responseCode, Boolean isXml, String uri) throws MoceanErrorException {
+        this.rawResponse = responseString;
+
         //remove these field for v1, no effect for v2
-        String rawResponse = responseString
+        responseString = responseString
                 .replaceAll("<verify_request>", "")
                 .replaceAll("</verify_request>", "")
                 .replaceAll("<verify_check>", "")
                 .replaceAll("</verify_check>", "");
 
+        if (isXml && this.transmitterConfig.getVersion().equalsIgnoreCase("1") && !Utils.isNullOrEmpty(uri)) {
+            if (uri.equals("/account/pricing")) {
+                responseString = responseString
+                        .replaceAll("<data>", "<destinations>")
+                        .replaceAll("</data>", "</destinations>");
+            } else if (uri.equals("/sms")) {
+                responseString = responseString
+                        .replaceAll("<result>", "<result><messages>")
+                        .replaceAll("</result>", "</messages></result>");
+            }
+        }
+
         if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
             throw new MoceanErrorException(
                     ResponseFactory.createObjectFromRawResponse(
-                            rawResponse,
+                            responseString,
                             ErrorResponse.class
-                    ).setRawResponse(responseString)
+                    ).setRawResponse(this.rawResponse)
             );
         }
 
         //these check is for v1 cause v1 http response code is not > 400, no effect for v2
-        Map<String, Object> tempParsedObject = ResponseFactory.createObjectFromRawResponse(responseString, Map.class);
-        if (tempParsedObject.get("status") != null && !tempParsedObject.get("status").toString().equalsIgnoreCase("0")) {
+        GenericModel tempParsedObject = ResponseFactory.createObjectFromRawResponse(responseString, GenericModel.class);
+        if (tempParsedObject.getStatus() != null && !tempParsedObject.getStatus().equalsIgnoreCase("0")) {
             throw new MoceanErrorException(
                     ResponseFactory.createObjectFromRawResponse(
-                            rawResponse,
+                            responseString,
                             ErrorResponse.class
-                    ).setRawResponse(responseString)
+                    ).setRawResponse(this.rawResponse)
             );
         }
 
-        return rawResponse;
+        return responseString;
     }
 
     private String urlEncodeUTF8(String s) {
@@ -126,5 +144,18 @@ public class Transmitter {
             ));
         }
         return sb.toString();
+    }
+
+    public TransmitterConfig getTransmitterConfig() {
+        return transmitterConfig;
+    }
+
+    public Transmitter setTransmitterConfig(TransmitterConfig transmitterConfig) {
+        this.transmitterConfig = transmitterConfig;
+        return this;
+    }
+
+    public String getRawResponse() {
+        return rawResponse;
     }
 }

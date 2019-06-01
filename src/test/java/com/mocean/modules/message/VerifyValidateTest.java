@@ -12,6 +12,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -67,64 +68,74 @@ public class VerifyValidateTest {
                 .setReqid("testing req id")
                 .setCode("testing code")
                 .send();
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testJsonResponseObject() {
-        try {
-            String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "verify_code.json")), StandardCharsets.UTF_8);
+    public void testJsonResponseObject() throws IOException, MoceanErrorException {
+        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "verify_code.json")), StandardCharsets.UTF_8);
 
-            VerifyValidate verifyValidateMock = mock(VerifyValidate.class);
-            when(verifyValidateMock.send())
-                    .thenReturn(
-                            ResponseFactory
-                                    .createObjectFromRawResponse(jsonResponse, VerifyValidateResponse.class)
-                                    .setRawResponse(jsonResponse)
-                    );
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/verify/check", invocationOnMock.getArgument(1));
 
-            VerifyValidateResponse verifyValidateResponse = verifyValidateMock.send();
-            assertEquals(verifyValidateResponse.toString(), jsonResponse);
-            this.testObject(verifyValidateResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+                        return transmitterMock.formatResponse(
+                                jsonResponse,
+                                HttpURLConnection.HTTP_OK,
+                                false,
+                                "/verify/check"
+                        );
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        VerifyValidateResponse verifyValidateResponse = mocean.verifyValidate()
+                .setReqid("testing req id")
+                .setCode("testing code")
+                .send();
+        assertEquals(verifyValidateResponse.toString(), jsonResponse);
+        this.testObject(verifyValidateResponse);
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testXmlResponseObject() {
-        try {
-            String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "verify_code.xml")), StandardCharsets.UTF_8);
+    public void testXmlResponseObject() throws IOException, MoceanErrorException {
+        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "verify_code.xml")), StandardCharsets.UTF_8);
 
-            VerifyValidate verifyValidateMock = mock(VerifyValidate.class);
-            when(verifyValidateMock.send())
-                    .thenReturn(
-                            ResponseFactory
-                                    .createObjectFromRawResponse(xmlResponse
-                                                    .replaceAll("<verify_check>", "")
-                                                    .replaceAll("</verify_check>", ""),
-                                            VerifyValidateResponse.class
-                                    ).setRawResponse(xmlResponse)
-                    );
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/verify/check", invocationOnMock.getArgument(1));
 
-            VerifyValidateResponse verifyValidateResponse = verifyValidateMock.send();
-            assertEquals(verifyValidateResponse.toString(), xmlResponse);
-            this.testObject(verifyValidateResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
+                        return transmitterMock.formatResponse(
+                                xmlResponse,
+                                HttpURLConnection.HTTP_OK,
+                                true,
+                                "/verify/check"
+                        );
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
 
-    @Test
-    public void testMalformedResponse() throws IOException {
-        try {
-            ResponseFactory
-                    .createObjectFromRawResponse("malform string", VerifyValidateResponse.class)
-                    .setRawResponse("malform string");
-            fail();
-        } catch (MoceanErrorException ignored) {
-        }
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        VerifyValidateResponse verifyValidateResponse = mocean.verifyValidate()
+                .setReqid("testing req id")
+                .setCode("testing code")
+                .send();
+        assertEquals(verifyValidateResponse.toString(), xmlResponse);
+        this.testObject(verifyValidateResponse);
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(VerifyValidateResponse verifyValidateResponse) {

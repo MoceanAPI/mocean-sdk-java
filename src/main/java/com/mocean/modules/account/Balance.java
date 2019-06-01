@@ -37,7 +37,7 @@ public class Balance extends AbstractClient {
 
         String responseStr = this.transmitter.get("/account/balance", this.params);
         return ResponseFactory.createObjectFromRawResponse(responseStr, BalanceResponse.class)
-                .setRawResponse(responseStr);
+                .setRawResponse(this.transmitter.getRawResponse());
     }
 
 }

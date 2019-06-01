@@ -42,7 +42,7 @@ public class MessageStatus extends AbstractClient {
 
         String responseStr = this.transmitter.get("/report/message", this.params);
         return ResponseFactory.createObjectFromRawResponse(responseStr, MessageStatusResponse.class)
-                .setRawResponse(responseStr);
+                .setRawResponse(this.transmitter.getRawResponse());
     }
 
 }

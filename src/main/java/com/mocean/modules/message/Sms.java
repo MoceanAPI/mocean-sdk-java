@@ -110,6 +110,6 @@ public class Sms extends AbstractClient {
         String responseStr = this.transmitter.post("/sms", this.params);
         this.reset();
         return ResponseFactory.createObjectFromRawResponse(responseStr, SmsResponse.class)
-                .setRawResponse(responseStr);
+                .setRawResponse(this.transmitter.getRawResponse());
     }
 }

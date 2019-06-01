@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PricingResponse extends AbstractResponse {
-    @XmlElementWrapper(name = "data")
+    @XmlElementWrapper(name = "destinations")
     @XmlElement(name = "destination")
     @JsonProperty("destinations")
     private Destination[] destinations;

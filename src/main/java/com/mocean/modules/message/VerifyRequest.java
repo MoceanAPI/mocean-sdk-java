@@ -93,7 +93,7 @@ public class VerifyRequest extends AbstractClient {
         String responseStr = this.transmitter.post(verifyRequestUrl, this.params);
 
         return ResponseFactory.createObjectFromRawResponse(responseStr, VerifyRequestResponse.class)
-                .setRawResponse(responseStr)
+                .setRawResponse(this.transmitter.getRawResponse())
                 .setVerifyRequest(this);
     }
 

@@ -31,6 +31,8 @@ class TransmitterTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         assertEquals("testing only", transmitterMock.get("test uri", new HashMap<>()));
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
@@ -48,6 +50,8 @@ class TransmitterTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         assertEquals("testing only", transmitterMock.post("test uri", new HashMap<>()));
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     //this is test for v1
@@ -57,7 +61,7 @@ class TransmitterTest {
         Transmitter transmitter = new Transmitter();
 
         try {
-            transmitter.formatResponse(jsonErrorResponse, 202);
+            transmitter.formatResponse(jsonErrorResponse, 202, false, null);
             fail();
         } catch (MoceanErrorException ex) {
             assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
@@ -66,7 +70,7 @@ class TransmitterTest {
         }
 
         try {
-            transmitter.formatResponse(jsonErrorResponse, 200);
+            transmitter.formatResponse(jsonErrorResponse, 200, false, null);
         } catch (MoceanErrorException ex) {
             assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
             assertEquals(jsonErrorResponse, ex.getErrorResponse().toString());
@@ -76,7 +80,7 @@ class TransmitterTest {
         String xmlErrorResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "error_response.json")), StandardCharsets.UTF_8);
 
         try {
-            transmitter.formatResponse(xmlErrorResponse, 202);
+            transmitter.formatResponse(xmlErrorResponse, 202, false, null);
         } catch (MoceanErrorException ex) {
             assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
             assertEquals(xmlErrorResponse, ex.getErrorResponse().toString());
@@ -84,7 +88,7 @@ class TransmitterTest {
         }
 
         try {
-            transmitter.formatResponse(xmlErrorResponse, 200);
+            transmitter.formatResponse(xmlErrorResponse, 200, false, null);
         } catch (MoceanErrorException ex) {
             assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
             assertEquals(xmlErrorResponse, ex.getErrorResponse().toString());
@@ -98,7 +102,7 @@ class TransmitterTest {
         Transmitter transmitter = new Transmitter();
 
         try {
-            transmitter.formatResponse(errorResponse, 400);
+            transmitter.formatResponse(errorResponse, 400, false, null);
         } catch (MoceanErrorException ex) {
             assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
             assertEquals(errorResponse, ex.getErrorResponse().toString());

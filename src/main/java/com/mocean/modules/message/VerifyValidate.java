@@ -45,7 +45,7 @@ public class VerifyValidate extends AbstractClient {
         String responseStr = this.transmitter.post("/verify/check", this.params);
 
         return ResponseFactory.createObjectFromRawResponse(responseStr, VerifyValidateResponse.class)
-                .setRawResponse(responseStr);
+                .setRawResponse(this.transmitter.getRawResponse());
     }
 
 }

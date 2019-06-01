@@ -52,7 +52,7 @@ public class Pricing extends AbstractClient {
 
         String responseStr = this.transmitter.get("/account/pricing", this.params);
         return ResponseFactory.createObjectFromRawResponse(responseStr, PricingResponse.class)
-                .setRawResponse(responseStr);
+                .setRawResponse(this.transmitter.getRawResponse());
     }
 
 }
