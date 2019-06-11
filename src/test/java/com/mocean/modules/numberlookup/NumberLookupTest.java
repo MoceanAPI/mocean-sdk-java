@@ -3,7 +3,6 @@ package com.mocean.modules.numberlookup;
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.exception.RequiredFieldException;
-import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.numberlookup.mapper.NumberLookupResponse;
 import com.mocean.system.Mocean;

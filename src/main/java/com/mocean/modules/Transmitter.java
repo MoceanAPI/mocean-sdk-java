@@ -81,19 +81,19 @@ public class Transmitter {
         this.rawResponse = responseString;
 
         //remove these field for v1, no effect for v2
-        responseString = responseString
+        String clonedResponseString = responseString
                 .replaceAll("<verify_request>", "")
                 .replaceAll("</verify_request>", "")
                 .replaceAll("<verify_check>", "")
                 .replaceAll("</verify_check>", "");
 
         if (isXml && this.transmitterConfig.getVersion().equalsIgnoreCase("1") && !Utils.isNullOrEmpty(uri)) {
-            if (uri.equals("/account/pricing")) {
-                responseString = responseString
+            if ("/account/pricing".equals(uri)) {
+                clonedResponseString = clonedResponseString
                         .replaceAll("<data>", "<destinations>")
                         .replaceAll("</data>", "</destinations>");
-            } else if (uri.equals("/sms")) {
-                responseString = responseString
+            } else if ("/sms".equals(uri)) {
+                clonedResponseString = clonedResponseString
                         .replaceAll("<result>", "<result><messages>")
                         .replaceAll("</result>", "</messages></result>");
             }
@@ -102,24 +102,24 @@ public class Transmitter {
         if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
             throw new MoceanErrorException(
                     ResponseFactory.createObjectFromRawResponse(
-                            responseString,
+                            clonedResponseString,
                             ErrorResponse.class
                     ).setRawResponse(this.rawResponse)
             );
         }
 
         //these check is for v1 cause v1 http response code is not > 400, no effect for v2
-        GenericModel tempParsedObject = ResponseFactory.createObjectFromRawResponse(responseString, GenericModel.class);
+        GenericModel tempParsedObject = ResponseFactory.createObjectFromRawResponse(clonedResponseString, GenericModel.class);
         if (tempParsedObject.getStatus() != null && !tempParsedObject.getStatus().equalsIgnoreCase("0")) {
             throw new MoceanErrorException(
                     ResponseFactory.createObjectFromRawResponse(
-                            responseString,
+                            clonedResponseString,
                             ErrorResponse.class
                     ).setRawResponse(this.rawResponse)
             );
         }
 
-        return responseString;
+        return clonedResponseString;
     }
 
     public String urlEncodeUTF8(HashMap<String, String> map) throws IOException {

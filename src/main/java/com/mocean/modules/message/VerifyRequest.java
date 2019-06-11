@@ -1,7 +1,6 @@
 package com.mocean.modules.message;
 
 import com.mocean.exception.MoceanErrorException;
-import com.mocean.modules.ErrorResponse;
 import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;

@@ -1,4 +1,4 @@
-package com.mocean.modules.message.mapper.Model;
+package com.mocean.modules.message.mapper.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

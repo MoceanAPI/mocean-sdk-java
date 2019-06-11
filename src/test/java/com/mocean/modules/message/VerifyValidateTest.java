@@ -3,7 +3,6 @@ package com.mocean.modules.message;
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.exception.RequiredFieldException;
-import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.VerifyValidateResponse;
 import com.mocean.system.Mocean;
