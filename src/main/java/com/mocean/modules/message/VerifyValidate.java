@@ -33,9 +33,9 @@ public class VerifyValidate extends AbstractClient {
         return this;
     }
 
-    public VerifyValidate create(HashMap<String, String> params) {
+    public VerifyValidateResponse send(HashMap<String, String> params) throws MoceanErrorException, IOException {
         super.create(params);
-        return this;
+        return this.send();
     }
 
     public VerifyValidateResponse send() throws MoceanErrorException, IOException {

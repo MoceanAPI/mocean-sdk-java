@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.StringReader;
 
 public class ResponseFactory {
+    private ResponseFactory() {
+    }
+
     public static <T> T createObjectFromRawResponse(String rawResponse, Class<T> type) throws MoceanErrorException {
         //first check whether is json
         try {

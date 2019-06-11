@@ -2,6 +2,7 @@ package com.mocean.modules.message;
 
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
+import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.VerifyValidateResponse;
@@ -16,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +51,7 @@ public class VerifyValidateTest {
     }
 
     @Test
-    public void testInquiry() throws IOException, MoceanErrorException {
+    public void testSend() throws IOException, MoceanErrorException {
         Transmitter transmitterMock = spy(Transmitter.class);
         doAnswer(
                 new Answer() {
@@ -63,11 +65,19 @@ public class VerifyValidateTest {
                 }
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
+        //test is required field set
+        try {
+            mocean.verifyValidate().send();
+            fail();
+        } catch (RequiredFieldException ex) {
+        }
+
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         mocean.verifyValidate()
-                .setReqid("testing req id")
-                .setCode("testing code")
-                .send();
+                .send(new HashMap<String, String>(){{
+                    put("mocean-reqid", "test req id");
+                    put("mocean-code", "test code");
+                }});
 
         verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }

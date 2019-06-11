@@ -2,6 +2,7 @@ package com.mocean.modules.numberlookup;
 
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
+import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.numberlookup.mapper.NumberLookupResponse;
@@ -16,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,9 +66,18 @@ public class NumberLookupTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+
+        //test is required field set
+        try {
+            mocean.numberLookup().inquiry();
+            fail();
+        } catch (RequiredFieldException ex) {
+        }
+
         mocean.numberLookup()
-                .setTo("testing to")
-                .inquiry();
+                .inquiry(new HashMap<String, String>(){{
+                    put("mocean-to", "testing to");
+                }});
 
         verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }

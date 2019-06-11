@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,7 +55,9 @@ public class BalanceTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        mocean.balance().inquiry();
+        mocean.balance().inquiry(new HashMap<String, String>() {{
+            put("mocean-resp-format", "json");
+        }});
 
         verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }

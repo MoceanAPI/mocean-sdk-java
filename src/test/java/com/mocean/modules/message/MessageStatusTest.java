@@ -2,6 +2,7 @@ package com.mocean.modules.message;
 
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
+import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.MessageStatusResponse;
@@ -16,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -57,9 +59,18 @@ public class MessageStatusTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+
+        //test is required field set
+        try {
+            mocean.messageStatus().inquiry();
+            fail();
+        } catch (RequiredFieldException ex) {
+        }
+
         mocean.messageStatus()
-                .setMsgid("test msg id")
-                .inquiry();
+                .inquiry(new HashMap<String, String>(){{
+                    put("mocean-msgid", "test msg id");
+                }});
 
         verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }

@@ -2,6 +2,7 @@ package com.mocean.modules.message;
 
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
+import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.VerifyRequestResponse;
@@ -74,7 +75,7 @@ public class VerifyRequestTest {
     }
 
     @Test
-    public void testInquiry() throws IOException, MoceanErrorException {
+    public void testSend() throws IOException, MoceanErrorException {
         Transmitter transmitterMock = spy(Transmitter.class);
         doAnswer(
                 new Answer() {
@@ -89,10 +90,19 @@ public class VerifyRequestTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+
+        //test is required field set
+        try {
+            mocean.verifyRequest().send();
+            fail();
+        } catch (RequiredFieldException ex) {
+        }
+
         mocean.verifyRequest()
-                .setTo("testing to")
-                .setBrand("testing brand")
-                .send();
+                .send(new HashMap<String, String>(){{
+                    put("mocean-to", "testing to");
+                    put("mocean-brand", "testing brand");
+                }});
 
         verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -107,6 +108,17 @@ class TransmitterTest {
             assertEquals(ex.getMessage(), ex.getErrorResponse().toString());
             assertEquals(errorResponse, ex.getErrorResponse().toString());
             assertEquals(ex.getErrorResponse().getStatus(), "1");
+            assertEquals(ex.getErrorResponse().getErrMsg(), "Authorization failed");
         }
+    }
+
+    @Test
+    public void testUrlEncodeUTF8() throws IOException {
+        HashMap<String, String> testMap = new HashMap<>();
+        testMap.put("Testing Only", "Hello World,");
+        testMap.put("Another Test", "World, Hello");
+
+        String encodedContent = (new Transmitter()).urlEncodeUTF8(testMap);
+        assertEquals(encodedContent, "Another+Test=World%2C+Hello&Testing+Only=Hello+World%2C");
     }
 }

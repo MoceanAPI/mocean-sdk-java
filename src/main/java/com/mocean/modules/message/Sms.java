@@ -93,9 +93,9 @@ public class Sms extends AbstractClient {
         return this;
     }
 
-    public Sms create(HashMap<String, String> params) {
+    public SmsResponse send(HashMap<String, String> params) throws MoceanErrorException, IOException {
         super.create(params);
-        return this;
+        return this.send();
     }
 
     public SmsResponse send() throws MoceanErrorException, IOException {

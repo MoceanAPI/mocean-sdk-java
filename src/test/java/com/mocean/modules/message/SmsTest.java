@@ -2,6 +2,7 @@ package com.mocean.modules.message;
 
 import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
+import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.account.mapper.BalanceResponse;
@@ -18,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -88,7 +90,7 @@ public class SmsTest {
     }
 
     @Test
-    public void testInquiry() throws IOException, MoceanErrorException {
+    public void testSend() throws IOException, MoceanErrorException {
         Transmitter transmitterMock = spy(Transmitter.class);
         doAnswer(
                 new Answer() {
@@ -103,9 +105,46 @@ public class SmsTest {
         ).when(transmitterMock).send(anyString(), anyString(), any());
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+
+        //test is required field set
+        try {
+            mocean.sms().send();
+            fail();
+        } catch (RequiredFieldException ex) {
+        }
+
         mocean.sms()
-                .setFrom("testing from")
-                .setTo("testing to")
+                .send(new HashMap<String, String>() {{
+                    put("from", "testing from");
+                    put("to", "testing to");
+                    put("text", "testing text");
+                }});
+
+        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
+    }
+
+    @Test
+    public void testSendFlashSms() throws MoceanErrorException, IOException {
+        Transmitter transmitterMock = spy(Transmitter.class);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        assertEquals("post", invocationOnMock.getArgument(0));
+                        assertEquals("/sms", invocationOnMock.getArgument(1));
+                        assertTrue(((HashMap<String, String>) invocationOnMock.getArgument(2)).containsKey("mocean-mclass"));
+                        assertTrue(((HashMap<String, String>) invocationOnMock.getArgument(2)).containsKey("mocean-alt-dcs"));
+
+                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.json")), StandardCharsets.UTF_8);
+                    }
+                }
+        ).when(transmitterMock).send(anyString(), anyString(), any());
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        Sms sms = mocean.flashSms();
+        sms.setFrom("testing from")
+                .addTo("testing to")
+                .addTo("another to")
                 .setText("testing text")
                 .send();
 

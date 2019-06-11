@@ -36,7 +36,7 @@ public class NumberLookup extends AbstractClient {
         return this.send();
     }
 
-    public NumberLookupResponse send(HashMap<String, String> params) throws MoceanErrorException, IOException {
+    public NumberLookupResponse inquiry(HashMap<String, String> params) throws MoceanErrorException, IOException {
         this.create(params);
         return this.send();
     }

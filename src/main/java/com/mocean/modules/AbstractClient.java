@@ -2,6 +2,7 @@ package com.mocean.modules;
 
 import com.mocean.exception.RequiredFieldException;
 import com.mocean.system.auth.AuthInterface;
+import com.mocean.utils.Utils;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -24,7 +25,7 @@ public class AbstractClient {
 
     protected void isRequiredFieldsSet() throws RequiredFieldException {
         for (String value : this.requiredFields) {
-            if (this.params.get(value) == null) {
+            if (Utils.isNullOrEmpty(this.params.get(value))) {
                 throw new RequiredFieldException(value + " is mandatory field, can't be empty.");
             }
         }
@@ -35,16 +36,14 @@ public class AbstractClient {
         Pattern prefixRegex = Pattern.compile("mocean-");
 
         for (String key : this.params.keySet()) {
-            if (this.params.get(key) == null) {
-                continue;
-            }
+            if (this.params.get(key) != null) {
+                Matcher prefix = prefixRegex.matcher(key);
 
-            Matcher prefix = prefixRegex.matcher(key);
-
-            if (!prefix.find()) {
-                newParams.put("mocean-" + key, this.params.get(key));
-            } else {
-                newParams.put(key, this.params.get(key));
+                if (!prefix.find()) {
+                    newParams.put("mocean-" + key, this.params.get(key));
+                } else {
+                    newParams.put(key, this.params.get(key));
+                }
             }
         }
 

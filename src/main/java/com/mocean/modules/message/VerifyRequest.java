@@ -55,7 +55,7 @@ public class VerifyRequest extends AbstractClient {
         return this;
     }
 
-    public VerifyRequest setReqId(String param){
+    public VerifyRequest setReqId(String param) {
         this.params.put("mocean-reqid", param);
         return this;
     }
@@ -65,14 +65,14 @@ public class VerifyRequest extends AbstractClient {
         return this;
     }
 
-    public VerifyRequest create(HashMap<String, String> params) {
-        super.create(params);
-        return this;
-    }
-
     public VerifyRequest sendAs(Channel channel) {
         this.channel = channel;
         return this;
+    }
+
+    public VerifyRequestResponse send(HashMap<String, String> params) throws MoceanErrorException, IOException {
+        super.create(params);
+        return this.send();
     }
 
     public VerifyRequestResponse send() throws MoceanErrorException, IOException {

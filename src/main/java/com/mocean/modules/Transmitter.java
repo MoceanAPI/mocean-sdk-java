@@ -9,7 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Transmitter {
     private TransmitterConfig transmitterConfig;
@@ -123,15 +122,7 @@ public class Transmitter {
         return responseString;
     }
 
-    private String urlEncodeUTF8(String s) {
-        try {
-            return URLEncoder.encode(s, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new UnsupportedOperationException(e);
-        }
-    }
-
-    private String urlEncodeUTF8(HashMap<String, String> map) {
+    public String urlEncodeUTF8(HashMap<String, String> map) throws IOException {
         StringBuilder sb = new StringBuilder();
         for (HashMap.Entry<String, String> entry : map.entrySet()) {
             if (sb.length() > 0) {
@@ -139,8 +130,8 @@ public class Transmitter {
             }
 
             sb.append(String.format("%s=%s",
-                    urlEncodeUTF8(entry.getKey()),
-                    urlEncodeUTF8(entry.getValue())
+                    URLEncoder.encode(entry.getKey(), "UTF8"),
+                    URLEncoder.encode(entry.getValue(), "UTF8")
             ));
         }
         return sb.toString();

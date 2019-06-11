@@ -9,7 +9,5 @@ jdk:
 
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Dgpg.skip
 
-script: mvn cobertura:cobertura
-
 after_success:
   - bash <(curl -s https://codecov.io/bash)
