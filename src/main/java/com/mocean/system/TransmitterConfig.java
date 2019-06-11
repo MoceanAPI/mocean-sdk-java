@@ -2,7 +2,7 @@ package com.mocean.system;
 
 public class TransmitterConfig {
     protected String baseUrl = "https://rest.moceanapi.com";
-    protected String version = "1";
+    protected String version = "2";
 
     public TransmitterConfig() {
     }

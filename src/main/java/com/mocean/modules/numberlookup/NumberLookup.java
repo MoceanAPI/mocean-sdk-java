@@ -45,7 +45,7 @@ public class NumberLookup extends AbstractClient {
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
-        String responseStr = this.transmitter.get("/nl", this.params);
+        String responseStr = this.transmitter.post("/nl", this.params);
         return ResponseFactory.createObjectFromRawResponse(responseStr, NumberLookupResponse.class)
                 .setRawResponse(this.transmitter.getRawResponse());
     }

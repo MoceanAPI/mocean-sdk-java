@@ -55,7 +55,7 @@ public class NumberLookupTest {
                 new Answer() {
                     @Override
                     public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
+                        assertEquals("post", invocationOnMock.getArgument(0));
                         assertEquals("/nl", invocationOnMock.getArgument(1));
 
                         return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "number_lookup.json")), StandardCharsets.UTF_8);
@@ -80,7 +80,7 @@ public class NumberLookupTest {
                 new Answer() {
                     @Override
                     public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
+                        assertEquals("post", invocationOnMock.getArgument(0));
                         assertEquals("/nl", invocationOnMock.getArgument(1));
 
                         return transmitterMock.formatResponse(
@@ -112,7 +112,7 @@ public class NumberLookupTest {
                 new Answer() {
                     @Override
                     public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
+                        assertEquals("post", invocationOnMock.getArgument(0));
                         assertEquals("/nl", invocationOnMock.getArgument(1));
 
                         return transmitterMock.formatResponse(
