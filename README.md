@@ -17,7 +17,7 @@ moceanapi.com][signup].
 
 To use the client library you'll need to have [created a Mocean account][signup]. 
 
-To install the Java client library using Maven.
+### Maven
 
 Add the following to the correct place in your project's POM file:
 ```xml
@@ -26,6 +26,32 @@ Add the following to the correct place in your project's POM file:
       <artifactId>moceanapisdk</artifactId>
       <version>1.x.x</version>
 </dependency>
+```
+
+### Gradle
+
+Add the following to `build.gradle`
+
+```groovy
+repositories {
+    mavenCentral()
+}
+```
+
+For Gradle 3.4 or Higher:
+
+```groovy
+dependencies {
+    implementation 'com.github.moceanapi:moceanapisdk:1.x.x'
+}
+```
+
+For older versions:
+
+```groovy
+dependencies {
+    compile 'com.github.moceanapi:moceanapisdk:1.x.x'
+}
 ```
 
 ## Usage
