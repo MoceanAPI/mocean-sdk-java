@@ -1,6 +1,9 @@
 package com.mocean.utils;
 
-public class Utils {
+public final class Utils {
+    private Utils() {
+    }
+
     public static boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();
     }

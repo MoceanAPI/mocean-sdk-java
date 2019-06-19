@@ -1,5 +1,6 @@
 package com.mocean.system;
 
+import com.mocean.exception.MoceanErrorException;
 import com.mocean.exception.RequiredFieldException;
 import com.mocean.system.auth.Basic;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +68,15 @@ public class MoceanTest {
             new Mocean(this.basic);
         } catch (Exception e) {
             fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testCreateMoceanObjWithUnsupportedCredential() {
+        try {
+            new Mocean(new DummyCredentials());
+            fail("created client with unsupported credential");
+        } catch (MoceanErrorException ignored) {
         }
     }
 }

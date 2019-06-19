@@ -17,32 +17,8 @@ public class VerifyValidateResponse extends AbstractResponse {
     @JsonProperty("reqid")
     private String reqId;
 
-    @XmlElement(name = "msgid")
-    @JsonProperty("msgid")
-    private String msgId;
-
-    @XmlElement(name = "price")
-    @JsonProperty("price")
-    private String price;
-
-    @XmlElement(name = "currency")
-    @JsonProperty("currency")
-    private String currency;
-
     public String getReqId() {
         return reqId;
-    }
-
-    public String getMsgId() {
-        return msgId;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public String getCurrency() {
-        return currency;
     }
 
     @Override

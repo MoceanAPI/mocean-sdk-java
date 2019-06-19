@@ -150,8 +150,5 @@ public class VerifyValidateTest {
     private void testObject(VerifyValidateResponse verifyValidateResponse) {
         assertEquals(verifyValidateResponse.getStatus(), "0");
         assertEquals(verifyValidateResponse.getReqId(), "CPASS_restapi_C0000002737000000.0002");
-        assertEquals(verifyValidateResponse.getMsgId(), "CPASS_restapi_C0000002737000000.0002");
-        assertEquals(verifyValidateResponse.getPrice(), "0.35");
-        assertEquals(verifyValidateResponse.getCurrency(), "MYR");
     }
 }
