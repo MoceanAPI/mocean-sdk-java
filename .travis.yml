@@ -1,0 +1,14 @@
+language: java
+sudo: false
+dist: trusty
+jdk:
+  - oraclejdk8
+  - oraclejdk9
+  - oraclejdk11
+  - openjdk8
+  - openjdk9
+
+install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Dgpg.skip
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
