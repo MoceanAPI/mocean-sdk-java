@@ -59,7 +59,8 @@ dependencies {
 Create a client with your API key and secret:
 
 ```java
-import com.mocean.system.*;
+import com.mocean.system.Mocean;
+import com.mocean.system.auth.Basic;
 
 Basic credential = new Basic("API_KEY_HERE","API_SECRET_HERE");
 Mocean mocean = new Mocean(credential);
