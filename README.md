@@ -3,7 +3,7 @@ MoceanAPI Client Library for Java
 [![Maven Release](https://img.shields.io/maven-central/v/com.github.moceanapi/moceanapisdk.svg)](https://mvnrepository.com/artifact/com.github.moceanapi/moceanapisdk)
 [![Build Status](https://img.shields.io/travis/com/MoceanAPI/mocean-sdk-java.svg)](https://travis-ci.com/MoceanAPI/mocean-sdk-java)
 [![codecov](https://img.shields.io/codecov/c/github/MoceanAPI/mocean-sdk-java.svg)](https://codecov.io/gh/MoceanAPI/mocean-sdk-java)
-[![codacy](https://img.shields.io/codacy/grade/b086d50e597c4b80924b8089ead7f20c.svg)](https://app.codacy.com/project/MoceanAPI/mocean-sdk-java/dashboard)
+[![codacy](https://img.shields.io/codacy/grade/c51a73cd91c74edfa1eca25d02497aa9.svg)](https://app.codacy.com/project/MoceanAPI/mocean-sdk-java/dashboard)
 [![license](https://img.shields.io/npm/l/mocean-sdk.svg)](https://www.npmjs.com/package/mocean-sdk)
 
 This is the Java client library for use Mocean's API. To use this, you'll need a Mocean account. Sign up [for free at 
