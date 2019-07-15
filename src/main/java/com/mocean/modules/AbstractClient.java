@@ -40,6 +40,7 @@ public class AbstractClient {
                 Matcher prefix = prefixRegex.matcher(key);
 
                 if (!prefix.find()) {
+                    newParams.remove(key);
                     newParams.put("mocean-" + key, this.params.get(key));
                 } else {
                     newParams.put(key, this.params.get(key));
