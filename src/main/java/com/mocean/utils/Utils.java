@@ -4,8 +4,14 @@ public final class Utils {
     private Utils() {
     }
 
-    public static boolean isNullOrEmpty(String str) {
-        return str == null || str.trim().isEmpty();
+    public static boolean isNullOrEmpty(Object str) {
+        try {
+            String parsedStr = str.toString();
+            return parsedStr == null || parsedStr.trim().isEmpty();
+        } catch (Exception ex) {
+            //unable to parse to string
+            return true;
+        }
     }
 
     public static boolean isArray(Object obj) {
