@@ -18,5 +18,6 @@ public class UtilsTest {
         String[] strArr = new String[]{"Hello"};
         assertTrue(Utils.isArray(strArr));
         assertFalse(Utils.isArray("Hello"));
+        assertFalse(Utils.isArray(null));
     }
 }

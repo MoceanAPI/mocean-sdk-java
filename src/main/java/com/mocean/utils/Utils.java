@@ -7,7 +7,7 @@ public final class Utils {
     public static boolean isNullOrEmpty(Object str) {
         try {
             String parsedStr = str.toString();
-            return parsedStr == null || parsedStr.trim().isEmpty();
+            return parsedStr.trim().isEmpty();
         } catch (Exception ex) {
             //unable to parse to string
             return true;
