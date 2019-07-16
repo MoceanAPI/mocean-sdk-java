@@ -27,7 +27,7 @@ public class Collect extends AbstractMccc {
         }
 
         if (Utils.isNullOrEmpty(this.requestData.get("timeout"))) {
-            this.requestData.put("timeout", 5);
+            this.requestData.put("timeout", 5000);
         }
     }
 
