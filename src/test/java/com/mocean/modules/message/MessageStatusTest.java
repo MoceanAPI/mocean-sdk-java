@@ -6,32 +6,21 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.MessageStatusResponse;
 import com.mocean.system.Mocean;
-import org.junit.jupiter.api.BeforeEach;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.mock.RuleAnswer;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class MessageStatusTest {
-    private Mocean mocean;
-
-    @BeforeEach
-    public void setUp() {
-        this.mocean = TestingUtils.getMoceanObj();
-    }
-
     @Test
     public void testSetterMethod() {
-        MessageStatus messageStatus = this.mocean.messageStatus();
+        MessageStatus messageStatus = TestingUtils.getMoceanObj().messageStatus();
 
         messageStatus.setMsgid("test msg id");
         assertNotNull(messageStatus.getParams().get("mocean-msgid"));
@@ -43,99 +32,62 @@ public class MessageStatusTest {
     }
 
     @Test
-    public void testInquiry() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/report/message", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_status.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testJsonInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/report/message"));
+                return TestingUtils.getResponse("message_status.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-
-        //test is required field set
-        try {
-            mocean.messageStatus().inquiry();
-            fail();
-        } catch (RequiredFieldException ex) {
-        }
-
-        mocean.messageStatus()
-                .inquiry(new HashMap<String, String>(){{
+        MessageStatusResponse messageStatusResponse = mocean.messageStatus()
+                .inquiry(new HashMap<String, String>() {{
                     put("mocean-msgid", "test msg id");
                 }});
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
+        assertEquals(messageStatusResponse.toString(), TestingUtils.getResponseString("message_status.json"));
+        this.testObject(messageStatusResponse);
     }
 
     @Test
-    public void testJsonResponseObject() throws IOException, MoceanErrorException {
-        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_status.json")), StandardCharsets.UTF_8);
+    public void testRequiredFieldNotSet() {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                return TestingUtils.getResponse("message_status.json", 200);
+            }
+        }));
 
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/report/message", invocationOnMock.getArgument(1));
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
 
-                        return transmitterMock.formatResponse(
-                                jsonResponse,
-                                HttpURLConnection.HTTP_OK,
-                                false,
-                                "/report/message"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                mocean.messageStatus().inquiry();
+            }
+        });
+    }
+
+    @Test
+    public void testXmlInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/report/message"));
+                return TestingUtils.getResponse("message_status.xml", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         MessageStatusResponse messageStatusResponse = mocean.messageStatus()
                 .setMsgid("test msg id")
+                .setRespFormat("xml")
                 .inquiry();
-        assertEquals(messageStatusResponse.toString(), jsonResponse);
+        assertEquals(messageStatusResponse.toString(), TestingUtils.getResponseString("message_status.xml"));
         this.testObject(messageStatusResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
-    }
-
-    @Test
-    public void testXmlResponseObject() throws IOException, MoceanErrorException {
-        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_status.json")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/report/message", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                xmlResponse,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/report/message"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
-
-        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        MessageStatusResponse messageStatusResponse = mocean.messageStatus()
-                .setMsgid("test msg id")
-                .inquiry();
-        assertEquals(messageStatusResponse.toString(), xmlResponse);
-        this.testObject(messageStatusResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(MessageStatusResponse messageStatusResponse) {

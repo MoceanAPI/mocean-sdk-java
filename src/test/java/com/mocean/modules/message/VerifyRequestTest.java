@@ -7,35 +7,22 @@ import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.VerifyRequestResponse;
 import com.mocean.system.Mocean;
-import org.junit.jupiter.api.BeforeEach;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.mock.RuleAnswer;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doAnswer;
 
 public class VerifyRequestTest {
-    private Mocean mocean;
-
-    @BeforeEach
-    public void setUp() {
-        this.mocean = TestingUtils.getMoceanObj();
-    }
-
     @Test
     public void testSetterMethod() {
-        VerifyRequest verifyRequest = this.mocean.verifyRequest();
+        VerifyRequest verifyRequest = TestingUtils.getMoceanObj().verifyRequest();
 
         verifyRequest.setTo("test to");
         assertNotNull(verifyRequest.getParams().get("mocean-to"));
@@ -75,52 +62,34 @@ public class VerifyRequestTest {
     }
 
     @Test
-    public void testSend() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/verify/req", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testRequiredFieldNotSet() {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                return TestingUtils.getResponse("send_code.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
 
-        //test is required field set
-        try {
-            mocean.verifyRequest().send();
-            fail();
-        } catch (RequiredFieldException ex) {
-        }
-
-        mocean.verifyRequest()
-                .send(new HashMap<String, String>(){{
-                    put("mocean-to", "testing to");
-                    put("mocean-brand", "testing brand");
-                }});
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                mocean.verifyRequest().send();
+            }
+        });
     }
 
     @Test
     public void testSendAsSmsChannel() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/verify/req/sms", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/verify/req/sms"));
+                return TestingUtils.getResponse("send_code.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         VerifyRequest verifyRequest = mocean.verifyRequest();
@@ -131,53 +100,41 @@ public class VerifyRequestTest {
                 .setTo("testing to")
                 .setBrand("testing brand")
                 .send();
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
     public void testResend() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/verify/resend/sms", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/verify/resend/sms"));
+                return TestingUtils.getResponse("send_code.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         mocean.verifyRequest()
                 .setReqId("testing req id")
                 .resend();
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
     public void testResendThroughResponseObject() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/verify/resend/sms", invocationOnMock.getArgument(1));
-                        assertEquals("CPASS_restapi_C0000002737000000.0002", ((HashMap<String, String>) invocationOnMock.getArgument(2)).get("mocean-reqid"));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "resend_code.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                HashMap<String, String> mapBody = TestingUtils.rewindBody((FormBody) request.body());
+                assertEquals("CPASS_restapi_C0000002737000000.0002", mapBody.get("mocean-reqid"));
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/verify/resend/sms"));
+                return TestingUtils.getResponse("resend_code.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        String sendCodeSampleResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
-        VerifyRequestResponse res = ResponseFactory.createObjectFromRawResponse(sendCodeSampleResponse, VerifyRequestResponse.class)
-                .setRawResponse(sendCodeSampleResponse)
+        VerifyRequestResponse res = ResponseFactory.createObjectFromRawResponse(TestingUtils.getResponseString("send_code.json"), VerifyRequestResponse.class)
+                .setRawResponse(TestingUtils.getResponseString("resend_code.json"))
                 .setVerifyRequest(mocean.verifyRequest());
 
         VerifyRequestResponse resendRes = res.resend();
@@ -185,74 +142,48 @@ public class VerifyRequestTest {
         assertEquals(resendRes.getReqId(), "CPASS_restapi_C0000002737000000.0002");
         assertEquals(resendRes.getTo(), "60123456789");
         assertEquals(resendRes.getResendNumber(), "1");
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testJsonResponseObject() throws IOException, MoceanErrorException {
-        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.json")), StandardCharsets.UTF_8);
+    public void testJsonSend() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/verify/req"));
+                return TestingUtils.getResponse("send_code.json", 200);
+            }
+        }));
 
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/verify/req", invocationOnMock.getArgument(1));
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        VerifyRequestResponse verifyRequestResponse = mocean.verifyRequest()
+                .send(new HashMap<String, String>() {{
+                    put("mocean-to", "testing to");
+                    put("mocean-brand", "testing brand");
+                }});
+        assertEquals(verifyRequestResponse.toString(), TestingUtils.getResponseString("send_code.json"));
+        this.testObject(verifyRequestResponse);
+    }
 
-                        return transmitterMock.formatResponse(
-                                jsonResponse,
-                                HttpURLConnection.HTTP_OK,
-                                false,
-                                "/verify/req"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    @Test
+    public void textXmlSend() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/verify/req"));
+                return TestingUtils.getResponse("send_code.xml", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         VerifyRequestResponse verifyRequestResponse = mocean.verifyRequest()
                 .setTo("testing to")
                 .setBrand("testing brand")
+                .setRespFormat("xml")
                 .send();
-        assertEquals(verifyRequestResponse.toString(), jsonResponse);
+        assertEquals(verifyRequestResponse.toString(), TestingUtils.getResponseString("send_code.xml"));
         this.testObject(verifyRequestResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
-    }
-
-    @Test
-    public void testXmlResponseObject() throws IOException, MoceanErrorException {
-        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "send_code.xml")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/verify/req", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                xmlResponse,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/verify/req"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
-
-        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        VerifyRequestResponse verifyRequestResponse = mocean.verifyRequest()
-                .setTo("testing to")
-                .setBrand("testing brand")
-                .send();
-        assertEquals(verifyRequestResponse.toString(), xmlResponse);
-        this.testObject(verifyRequestResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(VerifyRequestResponse verifyRequestResponse) {
