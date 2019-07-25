@@ -3,23 +3,35 @@ package com.mocean.modules;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.system.TransmitterConfig;
 import com.mocean.utils.Utils;
+import okhttp3.*;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Transmitter {
     private TransmitterConfig transmitterConfig;
+    private OkHttpClient okHttpClient;
     private String rawResponse;
 
     public Transmitter() {
         this(TransmitterConfig.make());
     }
 
+    public Transmitter(OkHttpClient okHttpClient) {
+        this(TransmitterConfig.make(), okHttpClient);
+    }
+
     public Transmitter(TransmitterConfig transmitterConfig) {
+        this(transmitterConfig, new OkHttpClient());
+    }
+
+    public Transmitter(TransmitterConfig transmitterConfig, OkHttpClient okHttpClient) {
         this.transmitterConfig = transmitterConfig;
+        this.okHttpClient = okHttpClient;
     }
 
     public String get(String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
@@ -38,43 +50,28 @@ public class Transmitter {
             params.put("mocean-resp-format", "json");
         }
 
-        URL url;
+        Request.Builder requestBuilder = new Request.Builder();
+
         if (method.equalsIgnoreCase("get")) {
-            url = new URL(this.transmitterConfig.getBaseUrl() + "/rest/" + this.transmitterConfig.getVersion() + uri + "?" + this.urlEncodeUTF8(params));
+            requestBuilder.url(this.transmitterConfig.getBaseUrl() + "/rest/" + this.transmitterConfig.getVersion() + uri + "?" + this.urlEncodeUTF8(params));
         } else {
-            url = new URL(this.transmitterConfig.getBaseUrl() + "/rest/" + this.transmitterConfig.getVersion() + uri);
+            requestBuilder.url(this.transmitterConfig.getBaseUrl() + "/rest/" + this.transmitterConfig.getVersion() + uri);
+
+            FormBody.Builder formBuilder = new FormBody.Builder();
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                formBuilder.add(entry.getKey(), entry.getValue());
+            }
+
+            requestBuilder.post(formBuilder.build());
         }
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod(method.toUpperCase());
+        Request request = requestBuilder.build();
+        Response response = this.okHttpClient.newCall(request).execute();
+        int responseCode = response.code();
+        String responseString = response.body().string();
+        response.close();
 
-        if (method.equalsIgnoreCase("post")) {
-            connection.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(this.urlEncodeUTF8(params));
-            wr.flush();
-            wr.close();
-        }
-
-        int responseCode = connection.getResponseCode();
-
-        InputStream resultStream;
-        if (responseCode < HttpURLConnection.HTTP_BAD_REQUEST) {
-            resultStream = connection.getInputStream();
-        } else {
-            resultStream = connection.getErrorStream();
-        }
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(resultStream));
-        StringBuilder response = new StringBuilder();
-
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        return this.formatResponse(response.toString(), responseCode, params.get("mocean-resp-format").equalsIgnoreCase("xml"), uri);
+        return this.formatResponse(responseString, responseCode, params.get("mocean-resp-format").equalsIgnoreCase("xml"), uri);
     }
 
     public String formatResponse(String responseString, int responseCode, Boolean isXml, String uri) throws MoceanErrorException {
