@@ -10,12 +10,6 @@ public class McccTest {
     @Test
     public void testMcccSay() throws RequiredFieldException {
         Say say = Mccc.say();
-        try {
-            say.getRequestData();
-            fail();
-        } catch (Exception ignored) {
-        }
-
         say.setText("testing text");
         assertEquals("testing text", say.getRequestData().get("text"));
 
@@ -25,12 +19,6 @@ public class McccTest {
     @Test
     public void testMcccBridge() throws RequiredFieldException {
         Bridge bridge = Mccc.bridge();
-        try {
-            bridge.getRequestData();
-            fail();
-        } catch (Exception ignored) {
-        }
-
         bridge.setTo("testing to");
         assertEquals("testing to", bridge.getRequestData().get("to"));
 
@@ -40,12 +28,6 @@ public class McccTest {
     @Test
     public void testMcccCollect() throws RequiredFieldException {
         Collect collect = Mccc.collect();
-        try {
-            collect.getRequestData();
-            fail();
-        } catch (Exception ignored) {
-        }
-
         collect.setEventUrl("testing event url");
         assertEquals("testing event url", collect.getRequestData().get("event-url"));
 
@@ -55,12 +37,6 @@ public class McccTest {
     @Test
     public void testMcccPlay() throws RequiredFieldException {
         Play play = Mccc.play();
-        try {
-            play.getRequestData();
-            fail();
-        } catch (Exception ignored) {
-        }
-
         play.setFiles("testing file");
         assertEquals("testing file", play.getRequestData().get("file"));
 
@@ -70,12 +46,6 @@ public class McccTest {
     @Test
     public void testMcccSleep() throws RequiredFieldException {
         Sleep sleep = Mccc.sleep();
-        try {
-            sleep.getRequestData();
-            fail();
-        } catch (Exception ignored) {
-        }
-
         sleep.setDuration(10000);
         assertEquals(10000, sleep.getRequestData().get("duration"));
 

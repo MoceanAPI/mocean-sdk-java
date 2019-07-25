@@ -9,36 +9,22 @@ import com.mocean.modules.voice.mapper.VoiceResponse;
 import com.mocean.modules.voice.mccc.AbstractMccc;
 import com.mocean.modules.voice.mccc.Say;
 import com.mocean.system.Mocean;
-import org.junit.jupiter.api.BeforeEach;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.mock.RuleAnswer;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doAnswer;
 
 public class VoiceTest {
-    private Mocean mocean;
-
-    @BeforeEach
-    public void setUp() {
-        this.mocean = TestingUtils.getMoceanObj();
-    }
-
     @Test
     public void testSetterMethod() throws IOException, RequiredFieldException {
-        Voice voice = this.mocean.voice();
+        Voice voice = TestingUtils.getMoceanObj().voice();
 
         voice.setTo("test to");
         assertNotNull(voice.getParams().get("mocean-to"));
@@ -64,13 +50,13 @@ public class VoiceTest {
         ), voice.getParams().get("mocean-call-control-commands"));
 
         //test overloading method
-        voice = this.mocean.voice();
+        voice = TestingUtils.getMoceanObj().voice();
         McccBuilder builderParams = (new McccBuilder()).add(Mccc.say("hello World"));
         voice.setCallControlCommands(builderParams);
         assertNotNull(voice.getParams().get("mocean-call-control-commands"));
         assertEquals(new ObjectMapper().writeValueAsString(builderParams.build()), voice.getParams().get("mocean-call-control-commands"));
 
-        voice = this.mocean.voice();
+        voice = TestingUtils.getMoceanObj().voice();
         AbstractMccc mcccParams = new Say().setText("hello world");
         voice.setCallControlCommands(mcccParams);
         assertNotNull(voice.getParams().get("mocean-call-control-commands"));
@@ -78,99 +64,62 @@ public class VoiceTest {
     }
 
     @Test
-    public void testCall() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/voice/dial", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "voice.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testRequiredFieldNotSet() {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                return TestingUtils.getResponse("voice.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
 
-        //test is required field set
-        try {
-            mocean.voice().call();
-            fail();
-        } catch (RequiredFieldException ex) {
-        }
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                mocean.voice().call();
+            }
+        });
+    }
 
-        mocean.voice()
+    @Test
+    public void testJsonCall() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/dial"));
+                return TestingUtils.getResponse("voice.json", 200);
+            }
+        }));
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        VoiceResponse voiceResponse = mocean.voice()
                 .call(new HashMap<String, String>() {{
                     put("mocean-to", "testing to");
                 }});
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
+        assertEquals(voiceResponse.toString(), TestingUtils.getResponseString("voice.json"));
+        this.testObject(voiceResponse);
     }
 
     @Test
-    public void testJsonResponseObject() throws IOException, MoceanErrorException {
-        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "voice.json")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/voice/dial", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                jsonResponse,
-                                HttpURLConnection.HTTP_OK,
-                                false,
-                                "/voice/dial"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testXmlCall() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/dial"));
+                return TestingUtils.getResponse("voice.xml", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         VoiceResponse voiceResponse = mocean.voice()
                 .setTo("testing to")
+                .setRespFormat("xml")
                 .call();
-        assertEquals(voiceResponse.toString(), jsonResponse);
+        assertEquals(voiceResponse.toString(), TestingUtils.getResponseString("voice.xml"));
         this.testObject(voiceResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
-    }
-
-    @Test
-    public void testXmlResponseObject() throws IOException, MoceanErrorException {
-        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "voice.xml")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/voice/dial", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                xmlResponse,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/voice/dial"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
-
-        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        VoiceResponse voiceResponse = mocean.voice()
-                .setTo("testing to")
-                .call();
-        assertEquals(voiceResponse.toString(), xmlResponse);
-        this.testObject(voiceResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(VoiceResponse voiceResponse) {
