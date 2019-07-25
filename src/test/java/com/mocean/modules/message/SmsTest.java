@@ -7,32 +7,22 @@ import com.mocean.modules.Transmitter;
 import com.mocean.modules.message.mapper.SmsResponse;
 import com.mocean.system.Mocean;
 import com.mocean.utils.Utils;
-import org.junit.jupiter.api.BeforeEach;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.mock.RuleAnswer;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class SmsTest {
-    private Mocean mocean;
-
-    @BeforeEach
-    public void setUp() {
-        this.mocean = TestingUtils.getMoceanObj();
-    }
-
     @Test
     public void testSetterMethod() {
-        Sms sms = this.mocean.sms();
+        Sms sms = TestingUtils.getMoceanObj().sms();
 
         sms.setFrom("test from");
         assertNotNull(sms.getParams().get("mocean-from"));
@@ -88,55 +78,38 @@ public class SmsTest {
     }
 
     @Test
-    public void testSend() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/sms", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testRequiredFieldNotSet() {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                return TestingUtils.getResponse("message.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
 
-        //test is required field set
-        try {
-            mocean.sms().send();
-            fail();
-        } catch (RequiredFieldException ex) {
-        }
-
-        mocean.sms()
-                .send(new HashMap<String, String>() {{
-                    put("from", "testing from");
-                    put("to", "testing to");
-                    put("text", "testing text");
-                }});
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                mocean.sms().send();
+            }
+        });
     }
 
     @Test
     public void testSendFlashSms() throws MoceanErrorException, IOException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/sms", invocationOnMock.getArgument(1));
-                        assertTrue(((HashMap<String, String>) invocationOnMock.getArgument(2)).containsKey("mocean-mclass"));
-                        assertTrue(((HashMap<String, String>) invocationOnMock.getArgument(2)).containsKey("mocean-alt-dcs"));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                HashMap<String, String> mapBody = TestingUtils.rewindBody((FormBody) request.body());
+                assertTrue(mapBody.containsKey("mocean-mclass"));
+                assertTrue(mapBody.containsKey("mocean-alt-dcs"));
+                assertEquals(mapBody.get("mocean-to"), "testing to,another to");
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/sms"));
+                return TestingUtils.getResponse("message.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         Sms sms = mocean.flashSms();
@@ -145,99 +118,60 @@ public class SmsTest {
                 .addTo("another to")
                 .setText("testing text")
                 .send();
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testJsonResponseObject() throws IOException, MoceanErrorException {
-        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.json")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/sms", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                jsonResponse,
-                                HttpURLConnection.HTTP_OK,
-                                false,
-                                "/sms"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testJsonSend() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/sms"));
+                return TestingUtils.getResponse("message.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         SmsResponse smsResponse = mocean.sms()
-                .setFrom("testing from")
-                .setTo("testing to")
-                .setText("testing text")
-                .send();
-        assertEquals(smsResponse.toString(), jsonResponse);
+                .send(new HashMap<String, String>() {{
+                    put("from", "testing from");
+                    put("to", "testing to");
+                    put("text", "testing text");
+                }});
+        assertEquals(smsResponse.toString(), TestingUtils.getResponseString("message.json"));
         this.testObject(smsResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testXmlResponseObject() throws IOException, MoceanErrorException {
-        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message.xml")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/sms", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                xmlResponse,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/sms"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testXmlSend() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("1", "/sms"));
+                return TestingUtils.getResponse("message.xml", 200);
+            }
+        }));
 
         transmitterMock.setTransmitterConfig(transmitterMock.getTransmitterConfig().setVersion("1"));
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         SmsResponse smsResponse = mocean.sms()
-                .setFrom("testing from")
-                .setTo("testing to")
-                .setText("testing text")
-                .send();
-        assertEquals(smsResponse.toString(), xmlResponse);
+                .send(new HashMap<String, String>() {{
+                    put("mocean-from", "testing from");
+                    put("mocean-to", "testing to");
+                    put("mocean-text", "testing text");
+                    put("mocean-resp-format", "xml");
+                }});
+        assertEquals(smsResponse.toString(), TestingUtils.getResponseString("message.xml"));
         this.testObject(smsResponse);
 
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
-
-
         //v2 test
-        String xmlResponseV2 = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "message_v2.xml")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterV2Mock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/sms", invocationOnMock.getArgument(1));
-
-                        return transmitterV2Mock.formatResponse(
-                                xmlResponseV2,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/sms"
-                        );
-                    }
-                }
-        ).when(transmitterV2Mock).send(anyString(), anyString(), any());
+        Transmitter transmitterV2Mock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                return TestingUtils.getResponse("message_v2.xml", 200);
+            }
+        }));
 
         transmitterV2Mock.setTransmitterConfig(transmitterV2Mock.getTransmitterConfig().setVersion("2"));
         mocean = TestingUtils.getMoceanObj(transmitterV2Mock);
@@ -245,11 +179,10 @@ public class SmsTest {
                 .setFrom("testing from")
                 .setTo("testing to")
                 .setText("testing text")
+                .setRespFormat("xml")
                 .send();
-        assertEquals(smsResponse.toString(), xmlResponseV2);
+        assertEquals(smsResponse.toString(), TestingUtils.getResponseString("message_v2.xml"));
         this.testObject(smsResponse);
-
-        verify(transmitterV2Mock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(SmsResponse smsResponse) {

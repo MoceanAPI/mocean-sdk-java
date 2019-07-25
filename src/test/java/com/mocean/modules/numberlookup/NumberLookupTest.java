@@ -6,35 +6,21 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.numberlookup.mapper.NumberLookupResponse;
 import com.mocean.system.Mocean;
-import org.junit.jupiter.api.BeforeEach;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.mock.RuleAnswer;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doAnswer;
 
 public class NumberLookupTest {
-    private Mocean mocean;
-
-    @BeforeEach
-    public void setUp() {
-        this.mocean = TestingUtils.getMoceanObj();
-    }
-
     @Test
     public void testSetterMethod() {
-        NumberLookup numberLookup = this.mocean.numberLookup();
+        NumberLookup numberLookup = TestingUtils.getMoceanObj().numberLookup();
 
         numberLookup.setTo("test to");
         assertNotNull(numberLookup.getParams().get("mocean-to"));
@@ -50,99 +36,62 @@ public class NumberLookupTest {
     }
 
     @Test
-    public void testInquiry() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/nl", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "number_lookup.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testRequiredFieldNotSet() {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                return TestingUtils.getResponse("number_lookup.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
 
-        //test is required field set
-        try {
-            mocean.numberLookup().inquiry();
-            fail();
-        } catch (RequiredFieldException ex) {
-        }
-
-        mocean.numberLookup()
-                .inquiry(new HashMap<String, String>(){{
-                    put("mocean-to", "testing to");
-                }});
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
+        assertThrows(RequiredFieldException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                mocean.numberLookup().inquiry();
+            }
+        });
     }
 
     @Test
-    public void testJsonResponseObject() throws IOException, MoceanErrorException {
-        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "number_lookup.json")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/nl", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                jsonResponse,
-                                HttpURLConnection.HTTP_OK,
-                                false,
-                                "/nl"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testJsonInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/nl"));
+                return TestingUtils.getResponse("number_lookup.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         NumberLookupResponse numberLookupResponse = mocean.numberLookup()
-                .setTo("testing to")
-                .inquiry();
-        assertEquals(numberLookupResponse.toString(), jsonResponse);
+                .inquiry(new HashMap<String, String>() {{
+                    put("mocean-to", "testing to");
+                }});
+        assertEquals(numberLookupResponse.toString(), TestingUtils.getResponseString("number_lookup.json"));
         this.testObject(numberLookupResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
     public void testXmlResponseObject() throws IOException, MoceanErrorException {
-        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "number_lookup.xml")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("post", invocationOnMock.getArgument(0));
-                        assertEquals("/nl", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                xmlResponse,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/nl"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/nl"));
+                return TestingUtils.getResponse("number_lookup.xml", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
         NumberLookupResponse numberLookupResponse = mocean.numberLookup()
                 .setTo("testing to")
+                .setRespFormat("xml")
                 .inquiry();
-        assertEquals(numberLookupResponse.toString(), xmlResponse);
+        assertEquals(numberLookupResponse.toString(), TestingUtils.getResponseString("number_lookup.xml"));
         this.testObject(numberLookupResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(NumberLookupResponse numberLookupResponse) {

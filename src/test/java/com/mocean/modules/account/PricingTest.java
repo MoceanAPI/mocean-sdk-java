@@ -6,32 +6,20 @@ import com.mocean.modules.Transmitter;
 import com.mocean.modules.account.mapper.PricingResponse;
 import com.mocean.system.Mocean;
 import com.mocean.utils.Utils;
-import org.junit.jupiter.api.BeforeEach;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.mock.RuleAnswer;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class PricingTest {
-    private Mocean mocean;
-
-    @BeforeEach
-    public void setUp() {
-        this.mocean = TestingUtils.getMoceanObj();
-    }
-
     @Test
     public void testSetterMethod() {
-        Pricing pricing = this.mocean.pricing();
+        Pricing pricing = TestingUtils.getMoceanObj().pricing();
 
         pricing.setMcc("test mcc");
         assertNotNull(pricing.getParams().get("mocean-mcc"));
@@ -51,117 +39,59 @@ public class PricingTest {
     }
 
     @Test
-    public void testInquiry() throws IOException, MoceanErrorException {
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/account/pricing", invocationOnMock.getArgument(1));
-
-                        return new String(Files.readAllBytes(Paths.get("src", "test", "resources", "price.json")), StandardCharsets.UTF_8);
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testJsonInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/account/pricing"));
+                return TestingUtils.getResponse("price.json", 200);
+            }
+        }));
 
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        mocean.pricing().inquiry(new HashMap<String, String>() {{
-            put("mocean-resp-format", "json");
-        }});
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
-    }
-
-    @Test
-    public void testJsonResponseObject() throws IOException, MoceanErrorException {
-        String jsonResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "price.json")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/account/pricing", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                jsonResponse,
-                                HttpURLConnection.HTTP_OK,
-                                false,
-                                "/account/pricing"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
-
-        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        PricingResponse pricingResponse = mocean.pricing().inquiry();
-        assertEquals(pricingResponse.toString(), jsonResponse);
+        PricingResponse pricingResponse = mocean.pricing()
+                .inquiry(new HashMap<String, String>() {{
+                    put("mocean-resp-format", "json");
+                }});
+        assertEquals(pricingResponse.toString(), TestingUtils.getResponseString("price.json"));
         this.testObject(pricingResponse);
-
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
     }
 
     @Test
-    public void testXmlResponseObject() throws IOException, MoceanErrorException {
-        String xmlResponse = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "price.xml")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterMock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/account/pricing", invocationOnMock.getArgument(1));
-
-                        return transmitterMock.formatResponse(
-                                xmlResponse,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/account/pricing"
-                        );
-                    }
-                }
-        ).when(transmitterMock).send(anyString(), anyString(), any());
+    public void testXmlInquiry() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("1", "/account/pricing"));
+                return TestingUtils.getResponse("price.xml", 200);
+            }
+        }));
 
         transmitterMock.setTransmitterConfig(transmitterMock.getTransmitterConfig().setVersion("1"));
         Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
-        PricingResponse pricingResponse = mocean.pricing().inquiry();
-        assertEquals(pricingResponse.toString(), xmlResponse);
+        PricingResponse pricingResponse = mocean.pricing()
+                .setRespFormat("xml")
+                .inquiry();
+        assertEquals(pricingResponse.toString(), TestingUtils.getResponseString("price.xml"));
         this.testObject(pricingResponse);
 
-        verify(transmitterMock, times(1)).send(anyString(), anyString(), any());
-
-
         //v2 test
-        String xmlResponseV2 = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "price_v2.xml")), StandardCharsets.UTF_8);
-
-        Transmitter transmitterV2Mock = spy(Transmitter.class);
-        doAnswer(
-                new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        assertEquals("get", invocationOnMock.getArgument(0));
-                        assertEquals("/account/pricing", invocationOnMock.getArgument(1));
-
-                        return transmitterV2Mock.formatResponse(
-                                xmlResponseV2,
-                                HttpURLConnection.HTTP_OK,
-                                true,
-                                "/account/pricing"
-                        );
-                    }
-                }
-        ).when(transmitterV2Mock).send(anyString(), anyString(), any());
+        Transmitter transmitterV2Mock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                return TestingUtils.getResponse("price_v2.xml", 200);
+            }
+        }));
 
         transmitterV2Mock.setTransmitterConfig(transmitterV2Mock.getTransmitterConfig().setVersion("2"));
         mocean = TestingUtils.getMoceanObj(transmitterV2Mock);
-        pricingResponse = mocean.pricing().inquiry();
-        assertEquals(pricingResponse.toString(), xmlResponseV2);
+        pricingResponse = mocean.pricing().inquiry(new HashMap<String, String>() {{
+            put("mocean-resp-format", "xml");
+        }});
+        assertEquals(pricingResponse.toString(), TestingUtils.getResponseString("price_v2.xml"));
         this.testObject(pricingResponse);
-
-        verify(transmitterV2Mock, times(1)).send(anyString(), anyString(), any());
     }
 
     private void testObject(PricingResponse pricingResponse) {
