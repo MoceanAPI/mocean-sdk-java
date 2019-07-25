@@ -22,10 +22,6 @@ public class VerifyRequestResponse extends AbstractResponse {
     @JsonProperty("reqid")
     private String reqId;
 
-    @XmlElement(name = "is_number_reachable")
-    @JsonProperty("is_number_reachable")
-    private String isNumberReachable;
-
     @XmlElement(name = "resend_number")
     @JsonProperty("resend_number")
     private String resendNumber;
@@ -36,10 +32,6 @@ public class VerifyRequestResponse extends AbstractResponse {
 
     public String getReqId() {
         return reqId;
-    }
-
-    public String getIsNumberReachable() {
-        return isNumberReachable;
     }
 
     public String getResendNumber() {
