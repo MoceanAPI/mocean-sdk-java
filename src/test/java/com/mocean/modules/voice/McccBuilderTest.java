@@ -4,7 +4,7 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.voice.mccc.Play;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class McccBuilderTest {
     @Test

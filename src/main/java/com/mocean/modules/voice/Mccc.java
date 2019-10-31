@@ -1,6 +1,11 @@
 package com.mocean.modules.voice;
 
-import com.mocean.modules.voice.mccc.*;
+import com.mocean.modules.voice.mccc.Collect;
+import com.mocean.modules.voice.mccc.Dial;
+import com.mocean.modules.voice.mccc.Play;
+import com.mocean.modules.voice.mccc.Record;
+import com.mocean.modules.voice.mccc.Say;
+import com.mocean.modules.voice.mccc.Sleep;
 
 public final class Mccc {
     private Mccc() {

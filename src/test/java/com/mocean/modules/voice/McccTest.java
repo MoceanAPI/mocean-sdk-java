@@ -1,10 +1,14 @@
 package com.mocean.modules.voice;
 
 import com.mocean.exception.RequiredFieldException;
-import com.mocean.modules.voice.mccc.*;
+import com.mocean.modules.voice.mccc.Collect;
+import com.mocean.modules.voice.mccc.Dial;
+import com.mocean.modules.voice.mccc.Play;
+import com.mocean.modules.voice.mccc.Say;
+import com.mocean.modules.voice.mccc.Sleep;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class McccTest {
     @Test
