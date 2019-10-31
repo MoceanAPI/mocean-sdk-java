@@ -8,21 +8,25 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BridgeTest {
+public class DialTest {
     @Test
     public void testRequestParams() throws RequiredFieldException {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("to", "testing to");
             put("action", "dial");
+            put("from", "callerid");
+            put("dial-sequentially", true);
         }};
-        Bridge bridge = new Bridge(params);
+        Dial dial = new Dial(params);
 
-        assertEquals(params, bridge.getRequestData());
+        assertEquals(params, dial.getRequestData());
 
-        bridge = new Bridge();
-        bridge.setTo("testing to");
+        dial = new Dial();
+        dial.setTo("testing to");
+        dial.setFrom("callerid");
+        dial.setDialSequentially(true);
 
-        assertEquals(params, bridge.getRequestData());
+        assertEquals(params, dial.getRequestData());
     }
 
     @Test
@@ -30,9 +34,9 @@ public class BridgeTest {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("to", "testing to");
         }};
-        Bridge bridge = new Bridge(params);
+        Dial dial = new Dial(params);
 
-        assertEquals("dial", bridge.getRequestData().get("action"));
+        assertEquals("dial", dial.getRequestData().get("action"));
     }
 
     @Test
@@ -40,8 +44,8 @@ public class BridgeTest {
         assertThrows(RequiredFieldException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                Bridge bridge = new Bridge();
-                bridge.getRequestData();
+                Dial dial = new Dial();
+                dial.getRequestData();
             }
         });
     }

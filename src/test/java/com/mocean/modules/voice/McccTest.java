@@ -17,21 +17,28 @@ public class McccTest {
     }
 
     @Test
-    public void testMcccBridge() throws RequiredFieldException {
-        Bridge bridge = Mccc.bridge();
-        bridge.setTo("testing to");
-        assertEquals("testing to", bridge.getRequestData().get("to"));
+    public void testMcccDial() throws RequiredFieldException {
+        Dial dial = Mccc.dial();
+        dial.setTo("testing to");
+        assertEquals("testing to", dial.getRequestData().get("to"));
 
-        assertEquals("testing to2", Mccc.bridge("testing to2").getRequestData().get("to"));
+        assertEquals("testing to2", Mccc.dial("testing to2").getRequestData().get("to"));
     }
 
     @Test
     public void testMcccCollect() throws RequiredFieldException {
         Collect collect = Mccc.collect();
         collect.setEventUrl("testing event url");
+        collect.setMin(1);
+        collect.setMax(1);
+        collect.setTimeout(500);
         assertEquals("testing event url", collect.getRequestData().get("event-url"));
 
-        assertEquals("testing event url2", Mccc.collect("testing event url2").getRequestData().get("event-url"));
+        collect = Mccc.collect("testing event url2");
+        collect.setMin(1);
+        collect.setMax(1);
+        collect.setTimeout(500);
+        assertEquals("testing event url2", collect.getRequestData().get("event-url"));
     }
 
     @Test
@@ -50,5 +57,10 @@ public class McccTest {
         assertEquals(10000, sleep.getRequestData().get("duration"));
 
         assertEquals(20000, Mccc.sleep(20000).getRequestData().get("duration"));
+    }
+
+    @Test
+    public void testMcccRecord() throws RequiredFieldException {
+        assertEquals("record", Mccc.record().getRequestData().get("action"));
     }
 }

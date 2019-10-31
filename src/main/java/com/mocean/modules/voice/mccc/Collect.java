@@ -12,23 +12,6 @@ public class Collect extends AbstractMccc {
 
     public Collect(HashMap<String, Object> params) {
         super(params);
-
-        //default value
-        if (Utils.isNullOrEmpty(this.requestData.get("min"))) {
-            this.requestData.put("min", 1);
-        }
-
-        if (Utils.isNullOrEmpty(this.requestData.get("max"))) {
-            this.requestData.put("max", 10);
-        }
-
-        if (Utils.isNullOrEmpty(this.requestData.get("terminators"))) {
-            this.requestData.put("terminators", "#");
-        }
-
-        if (Utils.isNullOrEmpty(this.requestData.get("timeout"))) {
-            this.requestData.put("timeout", 5000);
-        }
     }
 
     public Collect setEventUrl(String eventUrl) {
@@ -62,7 +45,6 @@ public class Collect extends AbstractMccc {
             add("event-url");
             add("min");
             add("max");
-            add("terminators");
             add("timeout");
         }};
     }

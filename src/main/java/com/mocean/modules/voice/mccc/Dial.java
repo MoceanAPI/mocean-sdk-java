@@ -3,17 +3,27 @@ package com.mocean.modules.voice.mccc;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Bridge extends AbstractMccc {
-    public Bridge() {
+public class Dial extends AbstractMccc {
+    public Dial() {
         this(new HashMap<>());
     }
 
-    public Bridge(HashMap<String, Object> params) {
+    public Dial(HashMap<String, Object> params) {
         super(params);
     }
 
-    public Bridge setTo(String to) {
+    public Dial setTo(String to) {
         super.requestData.put("to", to);
+        return this;
+    }
+
+    public Dial setFrom(String from) {
+        super.requestData.put("from", from);
+        return this;
+    }
+
+    public Dial setDialSequentially(Boolean dialSequentially) {
+        super.requestData.put("dial-sequentially", dialSequentially);
         return this;
     }
 

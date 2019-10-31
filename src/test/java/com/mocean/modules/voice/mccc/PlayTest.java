@@ -15,6 +15,7 @@ public class PlayTest {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("file", "testing file");
             put("barge-in", true);
+            put("clear-digit-cache", true);
             put("action", "play");
         }};
         Play play = new Play(params);
@@ -24,6 +25,7 @@ public class PlayTest {
         play = new Play();
         play.setFiles("testing file");
         play.setBargeIn(true);
+        play.setClearDigitCache(true);
 
         assertEquals(params, play.getRequestData());
     }

@@ -17,11 +17,6 @@ public class Sleep extends AbstractMccc {
         return this;
     }
 
-    public Sleep setBargeIn(Boolean bargeIn) {
-        this.requestData.put("barge-in", bargeIn);
-        return this;
-    }
-
     @Override
     protected ArrayList<String> requiredKey() {
         return new ArrayList<String>() {{

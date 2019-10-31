@@ -87,7 +87,7 @@ public class VoiceTest {
         Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
             @Override
             public Response.Builder respond(Request request) {
-                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertTrue(request.method().equalsIgnoreCase("post"));
                 assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/dial"));
                 return TestingUtils.getResponse("voice.json", 200);
             }
@@ -107,7 +107,7 @@ public class VoiceTest {
         Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
             @Override
             public Response.Builder respond(Request request) {
-                assertTrue(request.method().equalsIgnoreCase("get"));
+                assertTrue(request.method().equalsIgnoreCase("post"));
                 assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/dial"));
                 return TestingUtils.getResponse("voice.xml", 200);
             }

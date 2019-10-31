@@ -22,12 +22,12 @@ public final class Mccc {
         return new Play().setFiles(file);
     }
 
-    public static Bridge bridge() {
-        return new Bridge();
+    public static Dial dial() {
+        return new Dial();
     }
 
-    public static Bridge bridge(String to) {
-        return new Bridge().setTo(to);
+    public static Dial dial(String to) {
+        return new Dial().setTo(to);
     }
 
     public static Collect collect() {
@@ -44,5 +44,9 @@ public final class Mccc {
 
     public static Sleep sleep(int duration) {
         return new Sleep().setDuration(duration);
+    }
+
+    public static Record record() {
+        return new Record();
     }
 }

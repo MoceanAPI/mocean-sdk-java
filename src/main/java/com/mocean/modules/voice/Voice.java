@@ -69,7 +69,7 @@ public class Voice extends AbstractClient {
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
-        String responseStr = this.transmitter.get("/voice/dial", this.params);
+        String responseStr = this.transmitter.post("/voice/dial", this.params);
         return ResponseFactory.createObjectFromRawResponse(responseStr, VoiceResponse.class)
                 .setRawResponse(this.transmitter.getRawResponse());
     }

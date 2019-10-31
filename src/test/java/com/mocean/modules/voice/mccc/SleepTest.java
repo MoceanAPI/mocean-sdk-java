@@ -14,7 +14,6 @@ public class SleepTest {
     public void testRequestParams() throws RequiredFieldException {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("duration", 10000);
-            put("barge-in", true);
             put("action", "sleep");
         }};
         Sleep sleep = new Sleep(params);
@@ -23,7 +22,6 @@ public class SleepTest {
 
         sleep = new Sleep();
         sleep.setDuration(10000);
-        sleep.setBargeIn(true);
 
         assertEquals(params, sleep.getRequestData());
     }

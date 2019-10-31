@@ -16,6 +16,7 @@ public class SayTest {
             put("language", "testing language");
             put("text", "testing text");
             put("barge-in", true);
+            put("clear-digit-cache", true);
             put("action", "say");
         }};
         Say say = new Say(params);
@@ -26,6 +27,7 @@ public class SayTest {
         say.setLanguage("testing language");
         say.setText("testing text");
         say.setBargeIn(true);
+        say.setClearDigitCache(true);
 
         assertEquals(params, say.getRequestData());
     }

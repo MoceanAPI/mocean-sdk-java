@@ -34,6 +34,11 @@ public class Say extends AbstractMccc {
         return this;
     }
 
+    public Say setClearDigitCache(Boolean clearDigitCache) {
+        this.requestData.put("clear-digit-cache", clearDigitCache);
+        return this;
+    }
+
     @Override
     protected ArrayList<String> requiredKey() {
         return new ArrayList<String>() {{
