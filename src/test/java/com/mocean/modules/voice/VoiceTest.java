@@ -9,6 +9,7 @@ import com.mocean.modules.voice.mapper.VoiceResponse;
 import com.mocean.modules.voice.mccc.AbstractMccc;
 import com.mocean.modules.voice.mccc.Say;
 import com.mocean.system.Mocean;
+import com.mocean.utils.Utils;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mock.RuleAnswer;
@@ -126,8 +127,10 @@ public class VoiceTest {
     }
 
     private void testObject(VoiceResponse voiceResponse) {
-        assertEquals(voiceResponse.getStatus(), "0");
-        assertEquals(voiceResponse.getCallUuid(), "xxx-xxx-xxx-xxx");
-        assertEquals(voiceResponse.getSessionUuid(), "xxx-xxx-xxx-xxx");
+        assertTrue(Utils.isArray(voiceResponse.getCalls()));
+        assertEquals(voiceResponse.getCalls()[0].getStatus(), "0");
+        assertEquals(voiceResponse.getCalls()[0].getReceiver(), "60123456789");
+        assertEquals(voiceResponse.getCalls()[0].getCallUuid(), "xxx-xxx-xxx-xxx");
+        assertEquals(voiceResponse.getCalls()[0].getSessionUuid(), "xxx-xxx-xxx-xxx");
     }
 }
