@@ -6,6 +6,7 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
+import com.mocean.modules.voice.mapper.HangupResponse;
 import com.mocean.modules.voice.mapper.VoiceResponse;
 import com.mocean.modules.voice.mccc.AbstractMccc;
 import com.mocean.system.auth.AuthInterface;
@@ -63,6 +64,18 @@ public class Voice extends AbstractClient {
     public VoiceResponse call(HashMap<String, String> params) throws MoceanErrorException, IOException {
         this.create(params);
         return this.send();
+    }
+
+    public HangupResponse hangup(String callUuid) throws MoceanErrorException, IOException {
+        //override requiredField for hangup
+        this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret"};
+
+        this.createFinalParams();
+        this.isRequiredFieldsSet();
+
+        String responseStr = this.transmitter.post("/voice/hangup/" + callUuid, new HashMap<>());
+        return ResponseFactory.createObjectFromRawResponse(responseStr, HangupResponse.class)
+                .setRawResponse(this.transmitter.getRawResponse());
     }
 
     private VoiceResponse send() throws MoceanErrorException, IOException {

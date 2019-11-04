@@ -5,6 +5,7 @@ import com.mocean.TestingUtils;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.Transmitter;
+import com.mocean.modules.voice.mapper.HangupResponse;
 import com.mocean.modules.voice.mapper.VoiceResponse;
 import com.mocean.modules.voice.mccc.AbstractMccc;
 import com.mocean.modules.voice.mccc.Say;
@@ -124,6 +125,42 @@ public class VoiceTest {
                 .call();
         assertEquals(voiceResponse.toString(), TestingUtils.getResponseString("voice.xml"));
         this.testObject(voiceResponse);
+    }
+
+    @Test
+    public void testJsonHangup() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/hangup/xxx-xxx-xxx-xxx"));
+                return TestingUtils.getResponse("hangup.json", 200);
+            }
+        }));
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        HangupResponse hangupResponse = mocean.voice()
+                .hangup("xxx-xxx-xxx-xxx");
+        assertEquals(hangupResponse.toString(), TestingUtils.getResponseString("hangup.json"));
+        assertEquals(hangupResponse.getStatus(), "0");
+    }
+
+    @Test
+    public void testXmlHangup() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/hangup/xxx-xxx-xxx-xxx"));
+                return TestingUtils.getResponse("hangup.xml", 200);
+            }
+        }));
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        HangupResponse hangupResponse = mocean.voice()
+                .hangup("xxx-xxx-xxx-xxx");
+        assertEquals(hangupResponse.toString(), TestingUtils.getResponseString("hangup.xml"));
+        assertEquals(hangupResponse.getStatus(), "0");
     }
 
     private void testObject(VoiceResponse voiceResponse) {
