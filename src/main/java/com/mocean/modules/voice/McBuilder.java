@@ -1,27 +1,27 @@
 package com.mocean.modules.voice;
 
 import com.mocean.exception.RequiredFieldException;
-import com.mocean.modules.voice.mccc.AbstractMccc;
+import com.mocean.modules.voice.mc.AbstractMc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class McccBuilder {
-    protected ArrayList<AbstractMccc> mccc;
+public class McBuilder {
+    protected ArrayList<AbstractMc> mc;
 
-    public McccBuilder() {
-        this.mccc = new ArrayList<>();
+    public McBuilder() {
+        this.mc = new ArrayList<>();
     }
 
-    public McccBuilder add(AbstractMccc mccc) {
-        this.mccc.add(mccc);
+    public McBuilder add(AbstractMc mc) {
+        this.mc.add(mc);
         return this;
     }
 
     public ArrayList<HashMap<String, Object>> build() throws RequiredFieldException {
         ArrayList<HashMap<String, Object>> converted = new ArrayList<>();
-        for (AbstractMccc mccc : this.mccc) {
-            converted.add(mccc.getRequestData());
+        for (AbstractMc mc : this.mc) {
+            converted.add(mc.getRequestData());
         }
         return converted;
     }

@@ -7,8 +7,8 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.voice.mapper.HangupResponse;
 import com.mocean.modules.voice.mapper.VoiceResponse;
-import com.mocean.modules.voice.mccc.AbstractMccc;
-import com.mocean.modules.voice.mccc.Say;
+import com.mocean.modules.voice.mc.AbstractMc;
+import com.mocean.modules.voice.mc.Say;
 import com.mocean.system.Mocean;
 import com.mocean.utils.Utils;
 import okhttp3.Request;
@@ -35,9 +35,9 @@ public class VoiceTest {
         assertNotNull(voice.getParams().get("mocean-to"));
         assertEquals("test to", voice.getParams().get("mocean-to"));
 
-        voice.setCallEventUrl("test call event url");
-        assertNotNull(voice.getParams().get("mocean-call-event-url"));
-        assertEquals("test call event url", voice.getParams().get("mocean-call-event-url"));
+        voice.setEventUrl("test event url");
+        assertNotNull(voice.getParams().get("mocean-event-url"));
+        assertEquals("test event url", voice.getParams().get("mocean-event-url"));
 
         voice.setRespFormat("json");
         assertNotNull(voice.getParams().get("mocean-resp-format"));
@@ -46,26 +46,26 @@ public class VoiceTest {
         HashMap<String, Object> hashMapParams = new HashMap<String, Object>() {{
             put("action", "say");
         }};
-        voice.setCallControlCommands(hashMapParams);
-        assertNotNull(voice.getParams().get("mocean-call-control-commands"));
+        voice.setMoceanCommand(hashMapParams);
+        assertNotNull(voice.getParams().get("mocean-command"));
         assertEquals(new ObjectMapper().writeValueAsString(
                 new ArrayList<HashMap<String, Object>>() {{
                     add(hashMapParams);
                 }}
-        ), voice.getParams().get("mocean-call-control-commands"));
+        ), voice.getParams().get("mocean-command"));
 
         //test overloading method
         voice = TestingUtils.getMoceanObj().voice();
-        McccBuilder builderParams = (new McccBuilder()).add(Mccc.say("hello World"));
-        voice.setCallControlCommands(builderParams);
-        assertNotNull(voice.getParams().get("mocean-call-control-commands"));
-        assertEquals(new ObjectMapper().writeValueAsString(builderParams.build()), voice.getParams().get("mocean-call-control-commands"));
+        McBuilder builderParams = (new McBuilder()).add(Mc.say("hello World"));
+        voice.setMoceanCommand(builderParams);
+        assertNotNull(voice.getParams().get("mocean-command"));
+        assertEquals(new ObjectMapper().writeValueAsString(builderParams.build()), voice.getParams().get("mocean-command"));
 
         voice = TestingUtils.getMoceanObj().voice();
-        AbstractMccc mcccParams = new Say().setText("hello world");
-        voice.setCallControlCommands(mcccParams);
-        assertNotNull(voice.getParams().get("mocean-call-control-commands"));
-        assertEquals(new ObjectMapper().writeValueAsString((new McccBuilder()).add(mcccParams).build()), voice.getParams().get("mocean-call-control-commands"));
+        AbstractMc mcParams = new Say().setText("hello world");
+        voice.setMoceanCommand(mcParams);
+        assertNotNull(voice.getParams().get("mocean-command"));
+        assertEquals(new ObjectMapper().writeValueAsString((new McBuilder()).add(mcParams).build()), voice.getParams().get("mocean-command"));
     }
 
     @Test

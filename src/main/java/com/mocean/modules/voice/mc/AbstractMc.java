@@ -1,4 +1,4 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import com.mocean.exception.RequiredFieldException;
 import com.mocean.utils.Utils;
@@ -6,10 +6,10 @@ import com.mocean.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-abstract public class AbstractMccc {
+abstract public class AbstractMc {
     protected HashMap<String, Object> requestData;
 
-    protected AbstractMccc(HashMap<String, Object> params) {
+    protected AbstractMc(HashMap<String, Object> params) {
         this.requestData = params;
     }
 

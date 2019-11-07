@@ -1,9 +1,9 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Dial extends AbstractMccc {
+public class Dial extends AbstractMc {
     public Dial() {
         this(new HashMap<>());
     }

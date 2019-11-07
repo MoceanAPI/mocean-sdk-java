@@ -1,9 +1,9 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Sleep extends AbstractMccc {
+public class Sleep extends AbstractMc {
     public Sleep() {
         this(new HashMap<>());
     }

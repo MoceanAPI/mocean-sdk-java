@@ -1,4 +1,4 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import com.mocean.exception.RequiredFieldException;
 import org.junit.jupiter.api.Test;

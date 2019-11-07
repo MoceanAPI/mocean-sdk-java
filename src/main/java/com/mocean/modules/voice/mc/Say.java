@@ -1,11 +1,11 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import com.mocean.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Say extends AbstractMccc {
+public class Say extends AbstractMc {
     public Say() {
         this(new HashMap<>());
     }

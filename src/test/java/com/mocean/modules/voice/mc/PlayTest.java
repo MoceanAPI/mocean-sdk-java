@@ -1,4 +1,4 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import com.mocean.exception.RequiredFieldException;
 import org.junit.jupiter.api.Test;
@@ -9,39 +9,36 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SayTest {
+public class PlayTest {
     @Test
     public void testRequestParams() throws RequiredFieldException {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
-            put("language", "testing language");
-            put("text", "testing text");
+            put("file", "testing file");
             put("barge-in", true);
             put("clear-digit-cache", true);
-            put("action", "say");
+            put("action", "play");
         }};
-        Say say = new Say(params);
+        Play play = new Play(params);
 
-        assertEquals(params, say.getRequestData());
+        assertEquals(params, play.getRequestData());
 
-        say = new Say();
-        say.setLanguage("testing language");
-        say.setText("testing text");
-        say.setBargeIn(true);
-        say.setClearDigitCache(true);
+        play = new Play();
+        play.setFiles("testing file");
+        play.setBargeIn(true);
+        play.setClearDigitCache(true);
 
-        assertEquals(params, say.getRequestData());
+        assertEquals(params, play.getRequestData());
     }
 
     @Test
     public void testIfActionAutoDefined() throws RequiredFieldException {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
-            put("language", "testing language");
-            put("text", "testing text");
+            put("file", "testing file");
             put("barge-in", true);
         }};
-        Say say = new Say(params);
+        Play play = new Play(params);
 
-        assertEquals("say", say.getRequestData().get("action"));
+        assertEquals("play", play.getRequestData().get("action"));
     }
 
     @Test
@@ -49,8 +46,8 @@ public class SayTest {
         assertThrows(RequiredFieldException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                Say say = new Say();
-                say.getRequestData();
+                Play play = new Play();
+                play.getRequestData();
             }
         });
     }

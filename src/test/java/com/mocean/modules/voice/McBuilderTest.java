@@ -1,18 +1,18 @@
 package com.mocean.modules.voice;
 
 import com.mocean.exception.RequiredFieldException;
-import com.mocean.modules.voice.mccc.Play;
+import com.mocean.modules.voice.mc.Play;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class McccBuilderTest {
+public class McBuilderTest {
     @Test
     public void testAdd() throws RequiredFieldException {
         Play play = new Play();
         play.setFiles("testing file");
 
-        McccBuilder builder = new McccBuilder();
+        McBuilder builder = new McBuilder();
         builder.add(play);
         assertEquals(1, builder.build().size());
         assertEquals(play.getRequestData(), builder.build().get(0));

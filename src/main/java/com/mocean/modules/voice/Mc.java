@@ -1,14 +1,14 @@
 package com.mocean.modules.voice;
 
-import com.mocean.modules.voice.mccc.Collect;
-import com.mocean.modules.voice.mccc.Dial;
-import com.mocean.modules.voice.mccc.Play;
-import com.mocean.modules.voice.mccc.Record;
-import com.mocean.modules.voice.mccc.Say;
-import com.mocean.modules.voice.mccc.Sleep;
+import com.mocean.modules.voice.mc.Collect;
+import com.mocean.modules.voice.mc.Dial;
+import com.mocean.modules.voice.mc.Play;
+import com.mocean.modules.voice.mc.Record;
+import com.mocean.modules.voice.mc.Say;
+import com.mocean.modules.voice.mc.Sleep;
 
-public final class Mccc {
-    private Mccc() {
+public final class Mc {
+    private Mc() {
     }
 
     public static Say say() {

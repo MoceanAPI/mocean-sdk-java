@@ -8,7 +8,7 @@ import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.voice.mapper.HangupResponse;
 import com.mocean.modules.voice.mapper.VoiceResponse;
-import com.mocean.modules.voice.mccc.AbstractMccc;
+import com.mocean.modules.voice.mc.AbstractMc;
 import com.mocean.system.auth.AuthInterface;
 
 import java.io.IOException;
@@ -26,29 +26,29 @@ public class Voice extends AbstractClient {
         return this;
     }
 
-    public Voice setCallEventUrl(String callEventUrl) {
-        this.params.put("mocean-call-event-url", callEventUrl);
+    public Voice setEventUrl(String eventUrl) {
+        this.params.put("mocean-event-url", eventUrl);
         return this;
     }
 
-    public Voice setCallControlCommands(HashMap<String, Object> callControlCommands) throws IOException {
-        this.params.put("mocean-call-control-commands", new ObjectMapper().writeValueAsString(
+    public Voice setMoceanCommand(HashMap<String, Object> moceanCommand) throws IOException {
+        this.params.put("mocean-command", new ObjectMapper().writeValueAsString(
                 new ArrayList<HashMap<String, Object>>() {{
-                    add(callControlCommands);
+                    add(moceanCommand);
                 }}
         ));
         return this;
     }
 
-    public Voice setCallControlCommands(AbstractMccc callControlCommands) throws IOException, RequiredFieldException {
-        McccBuilder builder = new McccBuilder() {{
-            add(callControlCommands);
+    public Voice setMoceanCommand(AbstractMc moceanCommand) throws IOException, RequiredFieldException {
+        McBuilder builder = new McBuilder() {{
+            add(moceanCommand);
         }};
-        return this.setCallControlCommands(builder);
+        return this.setMoceanCommand(builder);
     }
 
-    public Voice setCallControlCommands(McccBuilder callControlCommands) throws IOException, RequiredFieldException {
-        this.params.put("mocean-call-control-commands", new ObjectMapper().writeValueAsString(callControlCommands.build()));
+    public Voice setMoceanCommand(McBuilder moceanCommand) throws IOException, RequiredFieldException {
+        this.params.put("mocean-command", new ObjectMapper().writeValueAsString(moceanCommand.build()));
         return this;
     }
 

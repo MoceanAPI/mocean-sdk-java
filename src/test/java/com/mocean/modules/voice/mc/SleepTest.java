@@ -1,4 +1,4 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import com.mocean.exception.RequiredFieldException;
 import org.junit.jupiter.api.Test;
@@ -9,36 +9,32 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class PlayTest {
+public class SleepTest {
     @Test
     public void testRequestParams() throws RequiredFieldException {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
-            put("file", "testing file");
-            put("barge-in", true);
-            put("clear-digit-cache", true);
-            put("action", "play");
+            put("duration", 10000);
+            put("action", "sleep");
         }};
-        Play play = new Play(params);
+        Sleep sleep = new Sleep(params);
 
-        assertEquals(params, play.getRequestData());
+        assertEquals(params, sleep.getRequestData());
 
-        play = new Play();
-        play.setFiles("testing file");
-        play.setBargeIn(true);
-        play.setClearDigitCache(true);
+        sleep = new Sleep();
+        sleep.setDuration(10000);
 
-        assertEquals(params, play.getRequestData());
+        assertEquals(params, sleep.getRequestData());
     }
 
     @Test
     public void testIfActionAutoDefined() throws RequiredFieldException {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
-            put("file", "testing file");
+            put("duration", 10000);
             put("barge-in", true);
         }};
-        Play play = new Play(params);
+        Sleep sleep = new Sleep(params);
 
-        assertEquals("play", play.getRequestData().get("action"));
+        assertEquals("sleep", sleep.getRequestData().get("action"));
     }
 
     @Test
@@ -46,8 +42,8 @@ public class PlayTest {
         assertThrows(RequiredFieldException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                Play play = new Play();
-                play.getRequestData();
+                Sleep sleep = new Sleep();
+                sleep.getRequestData();
             }
         });
     }

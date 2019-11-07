@@ -1,9 +1,9 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Collect extends AbstractMccc {
+public class Collect extends AbstractMc {
     public Collect() {
         this(new HashMap<>());
     }

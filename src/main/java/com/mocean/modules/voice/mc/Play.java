@@ -1,9 +1,9 @@
-package com.mocean.modules.voice.mccc;
+package com.mocean.modules.voice.mc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Play extends AbstractMccc {
+public class Play extends AbstractMc {
     public Play() {
         this(new HashMap<>());
     }
