@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocean.exception.MoceanErrorException;
 import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.AbstractClient;
+import com.mocean.modules.ErrorResponse;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.voice.mapper.HangupResponse;
@@ -101,9 +102,12 @@ public class Voice extends AbstractClient {
         }
 
         //this method will throw exception if there's error
-        this.transmitter.formatResponse(response.body().string(), response.code(), this.params.get("mocean-resp-format").equalsIgnoreCase("xml"), uri);
-        response.close();
-        return null;
+        throw new MoceanErrorException(
+                ResponseFactory.createObjectFromRawResponse(
+                        response.body().string(),
+                        ErrorResponse.class
+                ).setRawResponse(response.body().string())
+        );
     }
 
     private VoiceResponse send() throws MoceanErrorException, IOException {
