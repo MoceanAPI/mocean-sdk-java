@@ -7,9 +7,11 @@ import com.mocean.modules.AbstractClient;
 import com.mocean.modules.ResponseFactory;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.voice.mapper.HangupResponse;
+import com.mocean.modules.voice.mapper.RecordingResponse;
 import com.mocean.modules.voice.mapper.VoiceResponse;
 import com.mocean.modules.voice.mc.AbstractMc;
 import com.mocean.system.auth.AuthInterface;
+import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,6 +78,32 @@ public class Voice extends AbstractClient {
         String responseStr = this.transmitter.post("/voice/hangup/" + callUuid, new HashMap<>());
         return ResponseFactory.createObjectFromRawResponse(responseStr, HangupResponse.class)
                 .setRawResponse(this.transmitter.getRawResponse());
+    }
+
+    public RecordingResponse recording(String callUuid) throws MoceanErrorException, IOException {
+        //override requiredField for recording
+        this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-call-uuid"};
+
+        this.create(new HashMap<String, String>() {{
+            put("mocean-call-uuid", callUuid);
+        }});
+        this.createFinalParams();
+        this.isRequiredFieldsSet();
+
+        String uri = "/voice/rec";
+
+        Response response = this.transmitter.send("get", uri, this.params);
+        if ("audio/mpeg".equalsIgnoreCase(response.header("content-type"))) {
+            byte[] byteBody = response.body().bytes();
+            response.close();
+
+            return new RecordingResponse(byteBody, callUuid + ".mp3");
+        }
+
+        //this method will throw exception if there's error
+        this.transmitter.formatResponse(response.body().string(), response.code(), this.params.get("mocean-resp-format").equalsIgnoreCase("xml"), uri);
+        response.close();
+        return null;
     }
 
     private VoiceResponse send() throws MoceanErrorException, IOException {

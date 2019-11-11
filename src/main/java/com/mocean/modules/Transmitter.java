@@ -37,14 +37,23 @@ public class Transmitter {
     }
 
     public String get(String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
-        return this.send("get", uri, params);
+        return this.sendAndReturnStringResponse("get", uri, params);
     }
 
     public String post(String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
-        return this.send("post", uri, params);
+        return this.sendAndReturnStringResponse("post", uri, params);
     }
 
-    public String send(String method, String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
+    public String sendAndReturnStringResponse(String method, String uri, HashMap<String, String> params) throws IOException, MoceanErrorException {
+        Response response = this.send(method, uri, params);
+        int responseCode = response.code();
+        String responseString = response.body().string();
+        response.close();
+
+        return this.formatResponse(responseString, responseCode, params.get("mocean-resp-format").equalsIgnoreCase("xml"), uri);
+    }
+
+    public Response send(String method, String uri, HashMap<String, String> params) throws IOException {
         params.put("mocean-medium", "JAVA-SDK");
 
         //use json if default not set
@@ -68,12 +77,7 @@ public class Transmitter {
         }
 
         Request request = requestBuilder.build();
-        Response response = this.okHttpClient.newCall(request).execute();
-        int responseCode = response.code();
-        String responseString = response.body().string();
-        response.close();
-
-        return this.formatResponse(responseString, responseCode, params.get("mocean-resp-format").equalsIgnoreCase("xml"), uri);
+        return this.okHttpClient.newCall(request).execute();
     }
 
     public String formatResponse(String responseString, int responseCode, Boolean isXml, String uri) throws MoceanErrorException {
