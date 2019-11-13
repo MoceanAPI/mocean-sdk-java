@@ -10,6 +10,7 @@ import com.mocean.modules.message.Sms;
 import com.mocean.modules.message.VerifyRequest;
 import com.mocean.modules.message.VerifyValidate;
 import com.mocean.modules.numberlookup.NumberLookup;
+import com.mocean.modules.voice.Voice;
 import com.mocean.system.auth.AuthInterface;
 import com.mocean.utils.Utils;
 
@@ -68,5 +69,9 @@ public class Mocean {
 
     public NumberLookup numberLookup() {
         return new NumberLookup(this.objAuth, this.transmitter);
+    }
+
+    public Voice voice() {
+        return new Voice(this.objAuth, this.transmitter);
     }
 }
