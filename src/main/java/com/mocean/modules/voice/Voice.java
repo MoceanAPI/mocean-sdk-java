@@ -71,12 +71,15 @@ public class Voice extends AbstractClient {
 
     public HangupResponse hangup(String callUuid) throws MoceanErrorException, IOException {
         //override requiredField for hangup
-        this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret"};
+        this.requiredFields = new String[]{"mocean-api-key", "mocean-api-secret", "mocean-call-uuid"};
 
+        this.create(new HashMap<String, String>() {{
+            put("mocean-call-uuid", callUuid);
+        }});
         this.createFinalParams();
         this.isRequiredFieldsSet();
 
-        String responseStr = this.transmitter.post("/voice/hangup/" + callUuid, new HashMap<>());
+        String responseStr = this.transmitter.post("/voice/hangup", this.params);
         return ResponseFactory.createObjectFromRawResponse(responseStr, HangupResponse.class)
                 .setRawResponse(this.transmitter.getRawResponse());
     }

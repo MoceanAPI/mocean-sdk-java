@@ -11,6 +11,7 @@ import com.mocean.modules.voice.mc.AbstractMc;
 import com.mocean.modules.voice.mc.Say;
 import com.mocean.system.Mocean;
 import com.mocean.utils.Utils;
+import okhttp3.FormBody;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mock.RuleAnswer;
@@ -132,8 +133,10 @@ public class VoiceTest {
         Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
             @Override
             public Response.Builder respond(Request request) {
+                HashMap<String, String> mapBody = TestingUtils.rewindBody((FormBody) request.body());
+                assertEquals(mapBody.get("mocean-call-uuid"), "xxx-xxx-xxx-xxx");
                 assertTrue(request.method().equalsIgnoreCase("post"));
-                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/hangup/xxx-xxx-xxx-xxx"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/hangup"));
                 return TestingUtils.getResponse("hangup.json", 200);
             }
         }));
@@ -150,8 +153,10 @@ public class VoiceTest {
         Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
             @Override
             public Response.Builder respond(Request request) {
+                HashMap<String, String> mapBody = TestingUtils.rewindBody((FormBody) request.body());
+                assertEquals(mapBody.get("mocean-call-uuid"), "xxx-xxx-xxx-xxx");
                 assertTrue(request.method().equalsIgnoreCase("post"));
-                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/hangup/xxx-xxx-xxx-xxx"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/voice/hangup"));
                 return TestingUtils.getResponse("hangup.xml", 200);
             }
         }));
