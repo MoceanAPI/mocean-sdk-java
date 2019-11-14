@@ -16,7 +16,7 @@ import com.mocean.utils.Utils;
 
 
 public class Mocean {
-    public static final String SDK_VERSION = "1.0.0";
+    public static final String SDK_VERSION = "1.1.0";
     private AuthInterface objAuth;
     private Transmitter transmitter;
 
