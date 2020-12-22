@@ -100,7 +100,7 @@ License
 
 This library is released under the [MIT License][license]
 
-[signup]: https://dashboard.moceanapi.com/register?medium=github&campaign=sdk-java
+[signup]: https://dashboard.moceanapi.com/register?medium=github&campaign=java-sdk
 [doc_main]: https://moceanapi.com/docs/?java
 [doc_sms]: https://moceanapi.com/docs/?java#send-sms
 [license]: LICENSE.txt
