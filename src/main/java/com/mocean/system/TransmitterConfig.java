@@ -1,7 +1,8 @@
 package com.mocean.system;
 
 public class TransmitterConfig {
-    protected String baseUrl = "https://rest.moceanapi.com";
+//    protected String baseUrl = "https://rest.moceanapi.com";
+    protected String baseUrl = "https://rest-api-staging.moceansms.com";
     protected String version = "2";
 
     public TransmitterConfig() {
