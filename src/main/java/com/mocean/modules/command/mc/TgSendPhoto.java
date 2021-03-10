@@ -59,7 +59,7 @@ public class TgSendPhoto extends AbstractMc{
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("rich_media_url",url);
         params.put("text",text);
-        params.put("type","document");
+        params.put("type","photo");
         this.requestData.put("content",params);
         return this;
     }

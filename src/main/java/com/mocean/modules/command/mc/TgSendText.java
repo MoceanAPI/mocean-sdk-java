@@ -32,6 +32,7 @@ public class TgSendText extends AbstractMc{
     }
 
     public TgSendText from (String id, String type) {
+        this.removeParams("from");
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("id",id);
         params.put("type",type);
@@ -44,6 +45,7 @@ public class TgSendText extends AbstractMc{
     }
 
     public TgSendText to (String id, String type) {
+        this.removeParams("to");
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("id",id);
         params.put("type",type);
@@ -52,6 +54,7 @@ public class TgSendText extends AbstractMc{
     }
 
     public TgSendText content (String text) {
+        this.removeParams("content");
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("text",text);
         params.put("type","text");

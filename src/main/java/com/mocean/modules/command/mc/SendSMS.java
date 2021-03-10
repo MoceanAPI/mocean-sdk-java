@@ -32,6 +32,7 @@ public class SendSMS extends AbstractMc{
     }
 
     public SendSMS from (String id, String type) {
+        this.removeParams("from");
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("id",id);
         params.put("type",type);

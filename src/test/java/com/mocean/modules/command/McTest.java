@@ -24,8 +24,8 @@ public class McTest {
         TgRequestContact mc = Mc.TgRequestContact();
         mc.from("test from");
         mc.to("test to");
-        mc.content("text content");
-        mc.button("text button text");
+        mc.content("test content");
+        mc.button("test button text");
 
         assertEquals(tgRequestContact.getRequestData().get("from"), mc.getRequestData().get("from"));
         assertEquals(tgRequestContact.getRequestData().get("to"), mc.getRequestData().get("to"));
@@ -44,7 +44,7 @@ public class McTest {
         TgSendAnimation mc = Mc.TgSendAnimation();
         mc.from("test from");
         mc.to("test to");
-        mc.content("test url", "text content");
+        mc.content("test url", "test content");
 
         assertEquals(tgSendAnimation.getRequestData().get("from"), mc.getRequestData().get("from"));
         assertEquals(tgSendAnimation.getRequestData().get("to"), mc.getRequestData().get("to"));
@@ -62,7 +62,7 @@ public class McTest {
         TgSendAudio mc = Mc.TgSendAudio();
         mc.from("test from");
         mc.to("test to");
-        mc.content("test url", "text content");
+        mc.content("test url", "test content");
 
         assertEquals(tgSendAudio.getRequestData().get("from"), mc.getRequestData().get("from"));
         assertEquals(tgSendAudio.getRequestData().get("to"), mc.getRequestData().get("to"));
@@ -80,7 +80,7 @@ public class McTest {
         TgSendDocument mc = Mc.TgSendDocument();
         mc.from("test from");
         mc.to("test to");
-        mc.content("test url", "text content");
+        mc.content("test url", "test content");
 
         assertEquals(tgSendDocument.getRequestData().get("from"), mc.getRequestData().get("from"));
         assertEquals(tgSendDocument.getRequestData().get("to"), mc.getRequestData().get("to"));
@@ -98,7 +98,7 @@ public class McTest {
         TgSendPhoto mc = Mc.TgSendPhoto();
         mc.from("test from");
         mc.to("test to");
-        mc.content("test url", "text content");
+        mc.content("test url", "test content");
 
         assertEquals(tgSendPhoto.getRequestData().get("from"), mc.getRequestData().get("from"));
         assertEquals(tgSendPhoto.getRequestData().get("to"), mc.getRequestData().get("to"));
@@ -116,7 +116,7 @@ public class McTest {
         TgSendVideo mc = Mc.TgSendVideo();
         mc.from("test from");
         mc.to("test to");
-        mc.content("test url", "text content");
+        mc.content("test url", "test content");
 
         assertEquals(tgSendVideo.getRequestData().get("from"), mc.getRequestData().get("from"));
         assertEquals(tgSendVideo.getRequestData().get("to"), mc.getRequestData().get("to"));
@@ -134,7 +134,7 @@ public class McTest {
         SendSMS mc = Mc.SendSMS();
         mc.from("test from");
         mc.to("test to");
-        mc.content("text content");
+        mc.content("test content");
 
         assertEquals(sendSMS.getRequestData().get("from"), mc.getRequestData().get("from"));
         assertEquals(sendSMS.getRequestData().get("to"), mc.getRequestData().get("to"));

@@ -17,14 +17,14 @@ public class TgSendTextTest {
                     "from",
                     new HashMap<String, String>() {{
                         put("type", "bot_username");
-                        put("id", "test id");
+                        put("id", "test from");
                     }}
             );
             put(
                     "to",
                     new HashMap<String, String>() {{
                         put("type", "chat_id");
-                        put("id", "test id");
+                        put("id", "test to");
                     }}
             );
             put(
@@ -55,14 +55,14 @@ public class TgSendTextTest {
                     "from",
                     new HashMap<String, String>() {{
                         put("type", "bot_username");
-                        put("id", "test id");
+                        put("id", "test from");
                     }}
             );
             put(
                     "to",
                     new HashMap<String, String>() {{
                         put("type", "chat_id");
-                        put("id", "test id");
+                        put("id", "test to");
                     }}
             );
             put(

@@ -7,18 +7,10 @@ public class TgRequestContact extends AbstractMc{
 
     public TgRequestContact() {
         this(new HashMap<>());
-        this.createTgKeyboard();
     }
 
     public TgRequestContact(HashMap<String, Object> params) {
         super(params);
-        this.createTgKeyboard();
-    }
-
-    private void createTgKeyboard () {
-        HashMap<String, String> tgKeyboard = new HashMap<String, String>();
-        tgKeyboard.put("button_text","Press here to share contact");
-        tgKeyboard.put("button_request","contact");
     }
 
     @Override
@@ -27,6 +19,7 @@ public class TgRequestContact extends AbstractMc{
             add("from");
             add("to");
             add("content");
+            add("tg_keyboard");
         }};
     }
 
@@ -72,6 +65,7 @@ public class TgRequestContact extends AbstractMc{
         HashMap<String, String> tgKeyboard = new HashMap<String, String>();
         tgKeyboard.put("button_text",text);
         tgKeyboard.put("button_request","contact");
+        this.requestData.put("tg_keyboard",tgKeyboard);
         return this;
     }
 

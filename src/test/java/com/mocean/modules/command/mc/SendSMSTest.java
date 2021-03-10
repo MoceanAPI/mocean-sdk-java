@@ -17,14 +17,14 @@ public class SendSMSTest {
                     "from",
                     new HashMap<String, String>() {{
                         put("type", "phone_num");
-                        put("id", "test id");
+                        put("id", "test from");
                     }}
             );
             put(
                     "to",
                     new HashMap<String, String>() {{
                         put("type", "phone_num");
-                        put("id", "test id");
+                        put("id", "test to");
                     }}
             );
             put(
@@ -55,14 +55,14 @@ public class SendSMSTest {
                     "from",
                     new HashMap<String, String>() {{
                         put("type", "phone_num");
-                        put("id", "test id");
+                        put("id", "test from");
                     }}
             );
             put(
                     "to",
                     new HashMap<String, String>() {{
                         put("type", "phone_num");
-                        put("id", "test id");
+                        put("id", "test to");
                     }}
             );
             put(
@@ -75,7 +75,7 @@ public class SendSMSTest {
         }};
         SendSMS sendSMS = new SendSMS(params);
 
-        assertEquals("send-telegram", sendSMS.getRequestData().get("action"));
+        assertEquals("send-sms", sendSMS.getRequestData().get("action"));
     }
 
     @Test

@@ -11,6 +11,7 @@ abstract public class AbstractMc {
     public AbstractMc() {
 
     }
+
     protected HashMap<String, Object> requestData;
 
     protected AbstractMc(HashMap<String, Object> params) {
@@ -26,6 +27,10 @@ abstract public class AbstractMc {
 
         this.requestData.put("action", this.action());
         return this.requestData;
+    }
+
+    protected void removeParams(String name) {
+        this.requestData.remove(name);
     }
 
     abstract protected ArrayList<String> requiredKey();

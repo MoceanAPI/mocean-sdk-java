@@ -32,6 +32,7 @@ public class TgSendVideo extends AbstractMc{
     }
 
     public TgSendVideo from (String id, String type) {
+        this.removeParams("from");
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("id",id);
         params.put("type",type);
@@ -44,6 +45,7 @@ public class TgSendVideo extends AbstractMc{
     }
 
     public TgSendVideo to (String id, String type) {
+        this.removeParams("to");
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("id",id);
         params.put("type",type);
@@ -56,6 +58,7 @@ public class TgSendVideo extends AbstractMc{
     }
 
     public TgSendVideo content (String url, String text) {
+        this.removeParams("content");
         HashMap<String, String> params = new HashMap<String,String>();
         params.put("rich_media_url",url);
         params.put("text",text);
