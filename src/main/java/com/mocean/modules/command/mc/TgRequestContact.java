@@ -59,15 +59,11 @@ public class TgRequestContact extends AbstractMc{
         return this;
     }
 
-    public TgRequestContact content (String url) {
-        return this.content(url,"");
-    }
 
-    public TgRequestContact content (String url, String text) {
+    public TgRequestContact content (String text) {
         HashMap<String, String> params = new HashMap<String,String>();
-        params.put("rich_media_url",url);
         params.put("text",text);
-        params.put("type","animation");
+        params.put("type","text");
         this.requestData.put("content",params);
         return this;
     }

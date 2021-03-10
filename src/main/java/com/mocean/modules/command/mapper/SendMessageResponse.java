@@ -3,10 +3,9 @@ package com.mocean.modules.command.mapper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mocean.modules.AbstractResponse;
-import com.mocean.modules.command.mapper.model.MoceanCommandResp;
+import com.mocean.modules.command.mapper.model.Message;
 
 import javax.xml.bind.annotation.*;
-import java.util.List;
 
 @XmlRootElement(name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -17,21 +16,22 @@ public class SendMessageResponse extends AbstractResponse {
     @JsonProperty("session_uuid")
     public String sessionUuid;
 
-    @XmlElement(name = "mocean_command_resp")
-    @JsonProperty("mocean_command_resp")
-    public MoceanCommandResp[] moceanCommandResp;
+    @XmlElementWrapper(name = "messages")
+    @XmlElement(name = "message")
+    @JsonProperty("messages")
+    private Message[] messages;
+
+    public String getSessionUuid() {
+        return sessionUuid;
+    }
+
+    public Message[] getMessages(){
+        return messages;
+    }
 
     @Override
     public SendMessageResponse setRawResponse(String rawResponse) {
         super.rawResponse = rawResponse;
         return this;
-    }
-
-    public String sessionUuid() {
-        return sessionUuid;
-    }
-
-    public MoceanCommandResp[] moceanCommandResp(){
-        return moceanCommandResp;
     }
 }

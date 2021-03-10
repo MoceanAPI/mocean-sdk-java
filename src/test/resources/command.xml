@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<result>
+    <status>0</status>
+    <session_uuid>xxxx-xxxx</session_uuid>
+    <messages>
+        <message>
+            <action>xxxx-xxxx</action>
+            <mc_position>0</mc_position>
+            <message_id>xxxx-xxxx</message_id>
+            <total_messsge_segments>1</total_messsge_segments>
+        </message>
+    </messages>
+</result>
