@@ -7,10 +7,9 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.command.mapper.SendMessageResponse;
 import com.mocean.modules.command.mc.TgSendText;
+import com.mocean.modules.command.mc.AbstractMc;
 import com.mocean.modules.voice.mapper.HangupResponse;
 import com.mocean.modules.voice.mapper.VoiceResponse;
-import com.mocean.modules.voice.mc.AbstractMc;
-import com.mocean.modules.voice.mc.Say;
 import com.mocean.system.Mocean;
 import com.mocean.utils.Utils;
 import okhttp3.FormBody;
@@ -21,8 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,6 +64,50 @@ public class CommandTest {
         assertEquals(new ObjectMapper().writeValueAsString(builderParams.build()), command.getParams().get("mocean-command"));
     }
 
+    public void testJsonExecute() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/send-message"));
+                return TestingUtils.getResponse("command.json", 200);
+            }
+        }));
+
+        AbstractMc tgSendText = Mc.TgSendText().from("test from").to("test to").content("test content");
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        SendMessageResponse sendMessageResponse = mocean.command()
+                .setMoceanCommand((new McBuilder()).add(tgSendText))
+                .execute();
+        assertEquals(sendMessageResponse.toString(), TestingUtils.getResponseString("command.json"));
+        this.testObject(sendMessageResponse);
+    }
+
+    @Test
+    public void testXmlExecute() throws IOException, MoceanErrorException {
+        Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
+            @Override
+            public Response.Builder respond(Request request) {
+                assertTrue(request.method().equalsIgnoreCase("post"));
+                assertEquals(request.url().uri().getPath(), TestingUtils.getTestUri("2", "/send-message"));
+                return TestingUtils.getResponse("command.xml", 200);
+            }
+        }));
+
+        AbstractMc tgSendText = Mc.TgSendText().from("test from").to("test to").content("test content");
+
+        Mocean mocean = TestingUtils.getMoceanObj(transmitterMock);
+        SendMessageResponse sendMessageResponse = mocean.command()
+                .setMoceanCommand((new McBuilder()).add(tgSendText))
+                .setRespFormat("xml")
+                .execute();
+
+        assertEquals(sendMessageResponse.toString(), TestingUtils.getResponseString("command.xml"));
+        this.testObject(sendMessageResponse);
+    }
+
+
     @Test
     public void testRequiredFieldNotSet() {
         Transmitter transmitterMock = new Transmitter(TestingUtils.getMockOkHttpClient(new RuleAnswer() {
@@ -86,13 +129,13 @@ public class CommandTest {
 
     private void testObject(SendMessageResponse sendMessageResponse) {
 
-        assertEquals(sendMessageResponse.getStatus(),0);
+        assertEquals(sendMessageResponse.getStatus(),"0");
         assertEquals(sendMessageResponse.getSessionUuid(),"xxxx-xxxx");
 
         assertTrue(Utils.isArray(sendMessageResponse.getMessages()));
         assertEquals(sendMessageResponse.getMessages()[0].getAction(), "xxxx-xxxx");
         assertEquals(sendMessageResponse.getMessages()[0].getMessageId(), "xxxx-xxxx");
         assertEquals(sendMessageResponse.getMessages()[0].getMcPosition(), "0");
-        assertEquals(sendMessageResponse.getMessages()[0].getMcPosition(), "1");
+        assertEquals(sendMessageResponse.getMessages()[0].getTotalMessageSegments(), "1");
     }
 }

@@ -5,6 +5,10 @@ jdk:
   - oraclejdk8
   - oraclejdk9
   - oraclejdk11
+  - oraclejdk12
+  - oraclejdk13
+  - oraclejdk14
+  - oraclejdk15
   - openjdk8
 
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Dgpg.skip
@@ -17,6 +21,14 @@ matrix:
       dist: xenial
     - jdk: openjdk11
       dist: xenial
+    - jdk: openjdk12
+      dist: bionic
+    - jdk: openjdk13
+      dist: bionic
+    - jdk: openjdk14
+      dist: bionic
+    - jdk: openjdk15
+      dist: bionic
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
