@@ -1,15 +1,7 @@
 name: publish
 on:
-  push:
-    branches: [master]
-    paths-ignore:
-      - "**.md"
-      - ".github/workflows/**"
-  pull-request:
-    branches: [master]
-    paths-ignore:
-      - "**.md"
-      - ".github/workflows/**"
+  release:
+    types: [created]
 
 jobs:
   runs-on: ubuntu-latest
