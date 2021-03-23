@@ -1,7 +1,7 @@
 MoceanAPI Client Library for Java 
 ============================
 [![Maven Release](https://img.shields.io/maven-central/v/com.github.moceanapi/moceanapisdk.svg)](https://mvnrepository.com/artifact/com.github.moceanapi/moceanapisdk)
-[![Build Status](https://img.shields.io/travis/com/MoceanAPI/mocean-sdk-java.svg)](https://travis-ci.com/MoceanAPI/mocean-sdk-java)
+[![build](https://github.com/MoceanAPI/mocean-sdk-java/actions/workflows/build.yml/badge.svg)](https://github.com/MoceanAPI/mocean-sdk-java/actions/workflows/build.yml)
 [![codecov](https://img.shields.io/codecov/c/github/MoceanAPI/mocean-sdk-java.svg)](https://codecov.io/gh/MoceanAPI/mocean-sdk-java)
 [![codacy](https://img.shields.io/codacy/grade/c51a73cd91c74edfa1eca25d02497aa9.svg)](https://app.codacy.com/project/MoceanAPI/mocean-sdk-java/dashboard)
 [![license](https://img.shields.io/npm/l/mocean-sdk.svg)](https://www.npmjs.com/package/mocean-sdk)
