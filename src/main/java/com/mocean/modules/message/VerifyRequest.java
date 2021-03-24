@@ -24,6 +24,11 @@ public class VerifyRequest extends AbstractClient {
         return this;
     }
 
+    public VerifyRequest setBotUsername(String botUsername) {
+        this.params.put("mocean-bot-username",botUsername);
+        return this;
+    }
+
     public VerifyRequest setBrand(String param) {
         this.params.put("mocean-brand", param);
         return this;
@@ -87,6 +92,8 @@ public class VerifyRequest extends AbstractClient {
 
         if (this.channel == Channel.SMS) {
             verifyRequestUrl += "/sms";
+        } else if (this.channel == Channel.TELEGRAM) {
+            verifyRequestUrl += "/telegram";
         }
 
         String responseStr = this.transmitter.post(verifyRequestUrl, this.params);

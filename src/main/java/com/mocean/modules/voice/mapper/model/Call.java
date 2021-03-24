@@ -18,12 +18,12 @@ public class Call {
     @JsonProperty("receiver")
     private String receiver;
 
-    @XmlElement(name = "session-uuid")
-    @JsonProperty("session-uuid")
+    @XmlElement(name = "session_uuid")
+    @JsonProperty("session_uuid")
     private String sessionUuid;
 
-    @XmlElement(name = "call-uuid")
-    @JsonProperty("call-uuid")
+    @XmlElement(name = "call_uuid")
+    @JsonProperty("call_uuid")
     private String callUuid;
 
     public String getStatus() {
