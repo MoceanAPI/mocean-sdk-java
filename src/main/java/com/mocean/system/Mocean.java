@@ -5,6 +5,7 @@ import com.mocean.exception.RequiredFieldException;
 import com.mocean.modules.Transmitter;
 import com.mocean.modules.account.Balance;
 import com.mocean.modules.account.Pricing;
+import com.mocean.modules.command.Command;
 import com.mocean.modules.message.MessageStatus;
 import com.mocean.modules.message.Sms;
 import com.mocean.modules.message.VerifyRequest;
@@ -74,4 +75,6 @@ public class Mocean {
     public Voice voice() {
         return new Voice(this.objAuth, this.transmitter);
     }
+
+    public Command command() { return new Command(this.objAuth, this.transmitter); }
 }

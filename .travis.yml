@@ -4,8 +4,20 @@ dist: trusty
 jdk:
   - oraclejdk8
   - oraclejdk9
+  - oraclejdk10
   - oraclejdk11
+  - oraclejdk12
+  - oraclejdk13
+  - oraclejdk14
+  - oraclejdk15
   - openjdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
+  - openjdk12
+  - openjdk13
+  - openjdk14
+  - openjdk15
 
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Dgpg.skip
 
@@ -17,6 +29,7 @@ matrix:
       dist: xenial
     - jdk: openjdk11
       dist: xenial
+
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
