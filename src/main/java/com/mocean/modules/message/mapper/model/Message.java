@@ -22,6 +22,14 @@ public class Message {
     @JsonProperty("msgid")
     private String msgId;
 
+    @XmlElement(name = "total_segments")
+    @JsonProperty("total_segments")
+    private String totalSegments;
+
+    @XmlElement(name = "segment_no")
+    @JsonProperty("segment_no")
+    private String segmentNo;
+
     public String getStatus() {
         return status;
     }
@@ -32,5 +40,13 @@ public class Message {
 
     public String getMsgId() {
         return msgId;
+    }
+
+    public String getTotalSegments() {
+        return totalSegments;
+    }
+
+    public String getSegmentNo() {
+        return segmentNo;
     }
 }
