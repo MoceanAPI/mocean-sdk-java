@@ -75,7 +75,7 @@ public class Transmitter {
 
             requestBuilder.post(formBuilder.build());
         }
-
+        if (params.containsKey("mocean-api-token")) requestBuilder.addHeader("Authorization", "Bearer " + params.get("mocean-api-token"));
         Request request = requestBuilder.build();
         return this.okHttpClient.newCall(request).execute();
     }

@@ -24,11 +24,11 @@ public class AbstractClient {
     }
 
     protected void isRequiredFieldsSet() throws RequiredFieldException {
-        for (String value : this.requiredFields) {
-            if (Utils.isNullOrEmpty(this.params.get(value))) {
-                throw new RequiredFieldException(value + " is mandatory field, can't be empty.");
-            }
-        }
+        // for (String value : this.requiredFields) {
+        //     if (Utils.isNullOrEmpty(this.params.get(value))) {
+        //         throw new RequiredFieldException(value + " is mandatory field, can't be empty.");
+        //     }
+        // }
     }
 
     protected void createFinalParams() {
