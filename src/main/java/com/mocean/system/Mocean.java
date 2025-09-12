@@ -31,7 +31,7 @@ public class Mocean {
 
         if (objAuth.getAuthMethod().equalsIgnoreCase("basic")) {
             if ((Utils.isNullOrEmpty(objAuth.getParams().get("mocean-api-key")) || Utils.isNullOrEmpty(objAuth.getParams().get("mocean-api-secret"))) && Utils.isNullOrEmpty(objAuth.getParams().get("mocean-api-token"))) {
-                throw new RequiredFieldException("Api key or api secret and api token for client object can't be empty.");
+                throw new RequiredFieldException("Api key and api secret or api token for client object can't be empty.");
             }
         } else {
             throw new MoceanErrorException("Unsupported Auth Method");
