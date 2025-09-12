@@ -16,12 +16,21 @@ public class Basic implements AuthInterface {
         this.params.put("mocean-api-secret", apiSecret);
     }
 
+    public Basic(String apiToken) {
+        this.params = new HashMap<String, String>();
+        this.params.put("mocean-api-token", apiToken);
+    }
+
     public void setApiKey(String apiKey) {
         this.params.put("mocean-api-key", apiKey);
     }
 
     public void setApiSecret(String apiSecret) {
         this.params.put("mocean-api-secret", apiSecret);
+    }
+
+    public void setApiToken(String apiToken) {
+        this.params.put("mocean-api-token", apiToken);
     }
 
     @Override
