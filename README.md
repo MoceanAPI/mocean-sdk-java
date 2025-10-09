@@ -55,8 +55,19 @@ dependencies {
 ```
 
 ## Usage
+There are 2 ways to connect to MoceanAPI
 
-Create a client with your API key and secret:
+Option 1: Create a client with your API token:
+
+```java
+import com.mocean.system.Mocean;
+import com.mocean.system.auth.Basic;
+
+Basic credential = new Basic("API_TOKEN_HERE");
+Mocean mocean = new Mocean(credential);
+```
+
+Option 2 (legacy): Create a client with your API key and secret:
 
 ```java
 import com.mocean.system.Mocean;
