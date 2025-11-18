@@ -55,6 +55,7 @@ dependencies {
 ```
 
 ## Usage
+### For version >=1.1.6
 There are 2 ways to connect to MoceanAPI
 
 Option 1: Create a client with your API token:
@@ -68,6 +69,17 @@ Mocean mocean = new Mocean(credential);
 ```
 
 Option 2 (legacy): Create a client with your API key and secret:
+
+```java
+import com.mocean.system.Mocean;
+import com.mocean.system.auth.Basic;
+
+Basic credential = new Basic("API_KEY_HERE","API_SECRET_HERE");
+Mocean mocean = new Mocean(credential);
+```
+
+### For version <1.1.6
+Create a client with your API key and secret:
 
 ```java
 import com.mocean.system.Mocean;
