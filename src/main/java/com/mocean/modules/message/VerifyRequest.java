@@ -94,6 +94,8 @@ public class VerifyRequest extends AbstractClient {
             verifyRequestUrl += "/sms";
         } else if (this.channel == Channel.TELEGRAM) {
             verifyRequestUrl += "/telegram";
+        } else if (this.channel == Channel.EMAIL) {
+            verifyRequestUrl += "/email";
         }
 
         String responseStr = this.transmitter.post(verifyRequestUrl, this.params);

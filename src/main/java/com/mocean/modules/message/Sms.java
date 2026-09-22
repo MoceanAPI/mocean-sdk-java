@@ -84,6 +84,11 @@ public class Sms extends AbstractClient {
         return this;
     }
 
+    public Sms setTemplateId(String param) {
+        this.params.put("mocean-template-id", param);
+        return this;
+    }
+
     public Sms addTo(String param) {
         if (this.params.get("mocean-to") != null) {
             this.params.put("mocean-to", this.params.get("mocean-to") + "," + param);
